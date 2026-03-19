@@ -34,7 +34,7 @@ const SlideTitle = ({ children, anim, delay = 0.1, size = 44 }) => (
 const i18n = {
   es: {
     nav: { prev: "← Anterior", next: "Siguiente →", hint: "← → navegar" },
-    labels: ["Intro", "Problema", "Gaps", "Solución", "Por qué", "Cierre", "Equipo", "Gracias"],
+    labels: ["Intro", "Problema", "Gaps", "Solución", "Por qué", "Cierre", "Gracias"],
 
     intro: {
       tag: "🏆 Huckaton 2026 · Producto",
@@ -114,7 +114,7 @@ const i18n = {
 
   en: {
     nav: { prev: "← Previous", next: "Next →", hint: "← → navigate" },
-    labels: ["Intro", "Problem", "Gaps", "Solution", "Why Us", "Closing", "Team", "Thanks"],
+    labels: ["Intro", "Problem", "Gaps", "Solution", "Why Us", "Closing", "Thanks"],
 
     intro: {
       tag: "🏆 Hackathon 2026 · Product",
@@ -425,31 +425,7 @@ const slides = [
     );
   }},
 
-  /* 6 ── EQUIPO */
-  { label: "Equipo", render: (anim, t) => {
-    const c = t.team;
-    return (
-      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
-        <div style={{ textAlign: "center", marginBottom: 44 }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim}>{c.title}</SlideTitle>
-          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 15, marginTop: 10, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 36, maxWidth: 720, opacity: anim ? 1 : 0, transition: "opacity 0.8s ease 0.3s" }}>
-          {c.people.map((p, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ width: 104, height: 104, borderRadius: "50%", background: p.photo ? "transparent" : `linear-gradient(135deg, ${p.color}, ${p.color}99)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", fontSize: 28, fontWeight: 800, color: "#fff", boxShadow: `0 8px 28px ${p.color}44`, overflow: "hidden", border: `3px solid ${p.color}44` }}>
-                {p.photo ? <img src={p.photo} alt={p.initials} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} /> : p.initials}
-              </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: "#fff", marginTop: 14, whiteSpace: "pre-line", lineHeight: 1.35 }}>{p.name}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }},
-
-  /* 7 ── GRACIAS */
+  /* 6 ── GRACIAS */
   { label: "Gracias", render: (anim, t) => {
     const c = t.thanks;
     const people = t.team.people;
