@@ -109,6 +109,8 @@ const i18n = {
       body: "Career Path conecta a tu equipo con su futuro profesional, dentro de tu empresa.",
       demoLabel: "Probá la demo",
       demoSub: "Explorá la plataforma en vivo →",
+      videoLabel: "Video explicativo",
+      videoSub: "Mirá cómo funciona →",
     },
     thanks: {
       title: "¡Muchas gracias!",
@@ -224,6 +226,8 @@ const i18n = {
       body: "Career Path connects your team with their professional future, within your company.",
       demoLabel: "Try the demo",
       demoSub: "Explore the platform live →",
+      videoLabel: "Explainer video",
+      videoSub: "See how it works →",
     },
     thanks: {
       title: "Thank you!",
@@ -519,22 +523,24 @@ const slideRenderers = [
         <div style={{ textAlign: "center", zIndex: 1, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s ease" }}>
           <h1 style={{ color: "#fff", fontSize: 48, fontWeight: 800, margin: 0, lineHeight: 1.1, whiteSpace: "pre-line" }}>{c.title}</h1>
           <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 18, marginTop: 20, maxWidth: 500, margin: "20px auto 0" }}>{c.body}</p>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, marginTop: 36 }}>
-            <a
-              href="https://growthhub-phi.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4, background: "#fff", borderRadius: 16, padding: "16px 36px", textDecoration: "none", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", transition: "transform 0.2s, box-shadow 0.2s" }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.3)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.2)"; }}
-            >
-              <span style={{ fontSize: 17, fontWeight: 800, color: "#4F46E5" }}>{c.demoLabel}</span>
-              <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>{c.demoSub}</span>
-            </a>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.15)", borderRadius: 50, padding: "10px 22px", backdropFilter: "blur(10px)" }}>
-              <div style={{ width: 24, height: 24, borderRadius: 7, background: "rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", fontSize: 10 }}>hu</div>
-              <span style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>humand.co</span>
-            </div>
+          <div style={{ display: "flex", gap: 16, marginTop: 36, justifyContent: "center" }}>
+            {[
+              { href: "https://growthhub-phi.vercel.app/", label: c.demoLabel, sub: c.demoSub },
+              { href: "#", label: c.videoLabel, sub: c.videoSub },
+            ].map((btn, i) => (
+              <a
+                key={i}
+                href={btn.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, width: 200, background: "#fff", borderRadius: 16, padding: "16px 0", textDecoration: "none", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.3)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.2)"; }}
+              >
+                <span style={{ fontSize: 17, fontWeight: 800, color: "#4F46E5" }}>{btn.label}</span>
+                <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>{btn.sub}</span>
+              </a>
+            ))}
           </div>
         </div>
       </div>
