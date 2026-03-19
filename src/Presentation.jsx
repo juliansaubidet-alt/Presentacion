@@ -176,7 +176,7 @@ const i18n = {
 
     aprendizajeView: {
       eyebrow: "Paso 4 · Aprendizaje", title: "Los recursos correctos, en el orden correcto.",
-      subtitle: "El módulo integra cursos, certificaciones y workshops de Humand Learn y plataformas externas (LinkedIn Learning, Figma Academy, IDEO U). Cada recurso tiene una prioridad según la ruta: Esencial, Recomendado u Opcional.",
+      subtitle: "El módulo de cursos potencia y integra tu plan de carrera.",
       stepLabel: "Paso 4 de 5 · Aprendizaje",
       listTitle: "Cursos disponibles en Humand", listSub: "Ordenados por prioridad según tu ruta",
       filters: ["Esencial", "Recomendado", "Opcional"],
@@ -420,7 +420,7 @@ const i18n = {
 
     aprendizajeView: {
       eyebrow: "Step 4 · Learning", title: "The right resources, in the right order.",
-      subtitle: "The module integrates courses, certifications and workshops from Humand Learn and external platforms (LinkedIn Learning, Figma Academy, IDEO U). Each resource has a priority based on the path: Essential, Recommended or Optional.",
+      subtitle: "The course module powers and integrates your career plan.",
       stepLabel: "Step 4 of 5 · Learning",
       listTitle: "Available courses in Humand", listSub: "Sorted by priority based on your path",
       filters: ["Essential", "Recommended", "Optional"],
