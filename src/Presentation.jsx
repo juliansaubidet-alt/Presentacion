@@ -50,7 +50,7 @@ const SlideTitle = ({ children, anim, delay = 0.1, size = 44 }) => (
 const i18n = {
   es: {
     nav: { prev: "← Anterior", next: "Siguiente →", hint: "← → navegar" },
-    labels: ["Intro", "Problema", "Gaps", "Módulo", "Solución", "Colaborador", "Ruta", "Habilidades", "Objetivos", "Aprendizaje", "Revisión", "Confirmación", "Manager", "Cierre", "Gracias"],
+    labels: ["Intro", "Problema", "Gaps", "Módulo", "Solución", "Colaborador", "Ruta", "Habilidades", "Objetivos", "Aprendizaje", "Revisión", "Confirmación", "Manager", "Tools", "Cierre", "Gracias"],
 
     intro: {
       tag: "🏆 Huckathon 2026 · Producto",
@@ -264,6 +264,20 @@ const i18n = {
       us:   { label: "Humand Career Path",   items: ["El colaborador es el protagonista", "Seguimiento en tiempo real", "Skills + objetivos integrados", "Loop manager ↔ colaborador", "Dentro del contexto organizacional"] },
     },
 
+    tools: {
+      eyebrow: "Stack del proyecto", title: "Las herramientas que usamos.",
+      subtitle: "Construimos esta presentación y el producto con las mejores herramientas disponibles.",
+      items: [
+        { name: "Claude",  icon: "🤖", img: "/claude-logo.jpg", desc: "IA para diseño y desarrollo",      color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
+        { name: "GitHub",  icon: "🐙", img: "/github-logo.png", desc: "Control de versiones",             color: "#e2e8f0", bg: "rgba(226,232,240,0.08)" },
+        { name: "Vercel",  icon: "▲",  img: "/vercel-logo.svg", desc: "Deploy y hosting",                 color: "#fff",    bg: "rgba(255,255,255,0.08)" },
+        { name: "VS Code", icon: "💙", img: "/vscode-logo.png", desc: "Editor de código",                  color: "#4fc3f7", bg: "rgba(79,195,247,0.12)"  },
+        { name: "Figma",   icon: "🎨", img: "/figma-logo.png", desc: "Diseño de interfaz",               color: "#f87171", bg: "rgba(248,113,113,0.12)" },
+        { name: "Notion",  icon: "📝", img: "/notion-logo.png", desc: "Documentación y organización",     color: "#e2e8f0", bg: "rgba(226,232,240,0.08)" },
+        { name: "Git",     icon: "🔀", img: "/git-logo.png", desc: "Gestión de ramas y commits",       color: "#fb923c", bg: "rgba(251,146,60,0.12)"  },
+      ],
+    },
+
     closing: {
       tag: "🚀 Propuesta de Valor",
       titleA: "Tu carrera,\n", titleB: "tu plan", titleC: ",\ntu ritmo.",
@@ -294,7 +308,7 @@ const i18n = {
 
   en: {
     nav: { prev: "← Previous", next: "Next →", hint: "← → navigate" },
-    labels: ["Intro", "Problem", "Gaps", "Module", "Solution", "Employee", "Path", "Skills", "Goals", "Learning", "Review", "Confirmed", "Manager", "Closing", "Thanks"],
+    labels: ["Intro", "Problem", "Gaps", "Module", "Solution", "Employee", "Path", "Skills", "Goals", "Learning", "Review", "Confirmed", "Manager", "Tools", "Closing", "Thanks"],
 
     intro: {
       tag: "🏆 Hackathon 2026 · Product",
@@ -506,6 +520,20 @@ const i18n = {
       eyebrow: "Differentiator", title: "Why Humand?",
       them: { label: "The market today",     items: ["HR configures, employee consumes", "Static plans in documents", "Learning separate from development", "No manager visibility", "AI only recommends courses"] },
       us:   { label: "Humand Career Path",   items: ["Employee is the protagonist", "Real-time tracking", "Skills + objectives integrated", "Manager ↔ employee loop", "Within organizational context"] },
+    },
+
+    tools: {
+      eyebrow: "Project stack", title: "The tools we used.",
+      subtitle: "We built this presentation and the product with the best tools available.",
+      items: [
+        { name: "Claude",  icon: "🤖", img: "/claude-logo.jpg", desc: "AI for design and development",    color: "#a78bfa", bg: "rgba(167,139,250,0.12)" },
+        { name: "GitHub",  icon: "🐙", img: "/github-logo.png", desc: "Version control",                  color: "#e2e8f0", bg: "rgba(226,232,240,0.08)" },
+        { name: "Vercel",  icon: "▲",  img: "/vercel-logo.svg", desc: "Deploy and hosting",               color: "#fff",    bg: "rgba(255,255,255,0.08)" },
+        { name: "VS Code", icon: "💙", img: "/vscode-logo.png", desc: "Code editor",                       color: "#4fc3f7", bg: "rgba(79,195,247,0.12)"  },
+        { name: "Figma",   icon: "🎨", img: "/figma-logo.png", desc: "Interface design",                 color: "#f87171", bg: "rgba(248,113,113,0.12)" },
+        { name: "Notion",  icon: "📝", img: "/notion-logo.png", desc: "Documentation and organization",   color: "#e2e8f0", bg: "rgba(226,232,240,0.08)" },
+        { name: "Git",     icon: "🔀", img: "/git-logo.png", desc: "Branch and commit management",     color: "#fb923c", bg: "rgba(251,146,60,0.12)"  },
+      ],
     },
 
     closing: {
@@ -1161,7 +1189,35 @@ const slides = [
     );
   }},
 
-  /* 5 ── CIERRE */
+  /* 5 ── TOOLS */
+  { label: "Tools", render: (anim, t) => {
+    const c = t.tools;
+    return (
+      <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 40%, #1a2a5e 0%, #0a0a14 65%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px" }}>
+        <GridBg />
+        <div style={{ position: "relative", zIndex: 2, textAlign: "center", width: "100%", maxWidth: 820 }}>
+          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
+          <SlideTitle anim={anim} size={40}>{c.title}</SlideTitle>
+          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", marginTop: 10, marginBottom: 40, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
+            {c.items.map((tool, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, background: tool.bg, border: `1px solid ${tool.color}22`, borderRadius: 16, padding: "16px 22px", minWidth: 180, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: `all 0.5s ease ${0.15 + i * 0.07}s` }}>
+                <div style={{ width: 44, height: 44, borderRadius: tool.img ? "50%" : 12, background: `${tool.color}18`, border: `1px solid ${tool.color}33`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0, overflow: "hidden" }}>
+                  {tool.img ? <img src={tool.img} alt={tool.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : tool.icon}
+                </div>
+                <div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, color: tool.color }}>{tool.name}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{tool.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }},
+
+  /* 6 ── CIERRE */
   { label: "Cierre", render: (anim, t) => {
     const c = t.closing;
     return (
