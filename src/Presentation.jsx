@@ -50,7 +50,7 @@ const SlideTitle = ({ children, anim, delay = 0.1, size = 44 }) => (
 const i18n = {
   es: {
     nav: { prev: "← Anterior", next: "Siguiente →", hint: "← → navegar" },
-    labels: ["Intro", "Problema", "Gaps", "Módulo", "Solución", "Colaborador", "Ruta", "Habilidades", "Objetivos", "Aprendizaje", "Revisión", "Confirmación", "Manager", "Por qué", "Impacto", "Cierre", "Gracias"],
+    labels: ["Intro", "Problema", "Gaps", "Módulo", "Solución", "Colaborador", "Ruta", "Habilidades", "Objetivos", "Aprendizaje", "Revisión", "Confirmación", "Manager", "Impacto", "Cierre", "Gracias"],
 
     intro: {
       tag: "🏆 Huckathon 2026 · Producto",
@@ -294,7 +294,7 @@ const i18n = {
 
   en: {
     nav: { prev: "← Previous", next: "Next →", hint: "← → navigate" },
-    labels: ["Intro", "Problem", "Gaps", "Module", "Solution", "Employee", "Path", "Skills", "Goals", "Learning", "Review", "Confirmed", "Manager", "Why Us", "Impact", "Closing", "Thanks"],
+    labels: ["Intro", "Problem", "Gaps", "Module", "Solution", "Employee", "Path", "Skills", "Goals", "Learning", "Review", "Confirmed", "Manager", "Impact", "Closing", "Thanks"],
 
     intro: {
       tag: "🏆 Hackathon 2026 · Product",
@@ -1186,38 +1186,6 @@ const slides = [
             {c.bullets.map((b, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "rgba(255,255,255,0.7)" }}>
                 <span style={{ color: "#22c55e", fontSize: 13 }}>✓</span>{b}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 6 ── DIFERENCIADOR */
-  { label: "Por qué", render: (anim, t) => {
-    const c = t.diff;
-    return (
-      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
-        <div style={{ textAlign: "center", marginBottom: 44 }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim}>{c.title}</SlideTitle>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 20, width: "100%", maxWidth: 860, opacity: anim ? 1 : 0, transition: "opacity 0.6s ease 0.3s" }}>
-          <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 16, padding: 28 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1.5px", color: "rgba(255,255,255,0.35)", marginBottom: 20 }}>{c.them.label}</div>
-            {c.them.items.map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, marginBottom: 14, color: "rgba(255,255,255,0.6)" }}>
-                <span>❌</span>{item}
-              </div>
-            ))}
-          </div>
-          <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.4)", flexShrink: 0 }}>VS</div>
-          <div style={{ flex: 1, background: "rgba(111,147,235,0.05)", border: "1px solid rgba(111,147,235,0.3)", borderRadius: 16, padding: 28 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1.5px", color: BRAND, marginBottom: 20 }}>{c.us.label}</div>
-            {c.us.items.map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, marginBottom: 14, color: "rgba(255,255,255,0.88)" }}>
-                <span>✅</span>{item}
               </div>
             ))}
           </div>
