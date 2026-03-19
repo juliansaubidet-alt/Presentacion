@@ -83,9 +83,8 @@ const i18n = {
         { num: "01", icon: "🗺️", title: "Ruta profesional",  desc: "Define el tipo de crecimiento y el rol objetivo." },
         { num: "02", icon: "🎯", title: "Habilidades",        desc: "Identifica brechas entre el rol actual y el objetivo." },
         { num: "03", icon: "📋", title: "Objetivos",          desc: "Corto, mediano y largo plazo. Sugeridos y editables." },
-        { num: "04", icon: "📚", title: "Aprendizaje",        desc: "Cursos priorizados según la ruta: esenciales y recomendados." },
-        { num: "05", icon: "🔗", title: "Se integra y potencia el módulo de curso existente", desc: "Podés integrarlo dentro de tu plan de carrera." },
-        { num: "06", icon: "✅", title: "Revisión y envío",   desc: "El colaborador envía al manager para aprobación." },
+        { num: "04", icon: "📚", title: "Aprendizaje",        desc: "Se integra con el módulo de cursos y los prioriza según tu plan de carrera." },
+        { num: "05", icon: "✅", title: "Revisión y envío",   desc: "El colaborador envía al manager para aprobación." },
       ],
     },
 
@@ -328,9 +327,8 @@ const i18n = {
         { num: "01", icon: "🗺️", title: "Career path",      desc: "Defines the type of growth and target role." },
         { num: "02", icon: "🎯", title: "Skills",            desc: "Identifies gaps between current and target role." },
         { num: "03", icon: "📋", title: "Goals",             desc: "Short, medium and long-term. AI-suggested and editable." },
-        { num: "04", icon: "📚", title: "Learning",          desc: "Courses prioritized by path: essential and recommended." },
-        { num: "05", icon: "🔗", title: "Integrates and enhances the existing course module", desc: "You can integrate it within your career plan." },
-        { num: "06", icon: "✅", title: "Review & submit",   desc: "Employee sends plan to manager for approval." },
+        { num: "04", icon: "📚", title: "Learning",          desc: "Integrates with the course module and prioritizes them according to your career plan." },
+        { num: "05", icon: "✅", title: "Review & submit",   desc: "Employee sends plan to manager for approval." },
       ],
     },
 
