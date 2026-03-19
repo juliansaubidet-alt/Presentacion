@@ -50,7 +50,7 @@ const SlideTitle = ({ children, anim, delay = 0.1, size = 44 }) => (
 const i18n = {
   es: {
     nav: { prev: "← Anterior", next: "Siguiente →", hint: "← → navegar" },
-    labels: ["Intro", "Problema", "Gaps", "Módulo", "Solución", "Colaborador", "Ruta", "Habilidades", "Objetivos", "Aprendizaje", "Revisión", "Confirmación", "Manager", "Impacto", "Cierre", "Gracias"],
+    labels: ["Intro", "Problema", "Gaps", "Módulo", "Solución", "Colaborador", "Ruta", "Habilidades", "Objetivos", "Aprendizaje", "Revisión", "Confirmación", "Manager", "Cierre", "Gracias"],
 
     intro: {
       tag: "🏆 Huckathon 2026 · Producto",
@@ -294,7 +294,7 @@ const i18n = {
 
   en: {
     nav: { prev: "← Previous", next: "Next →", hint: "← → navigate" },
-    labels: ["Intro", "Problem", "Gaps", "Module", "Solution", "Employee", "Path", "Skills", "Goals", "Learning", "Review", "Confirmed", "Manager", "Impact", "Closing", "Thanks"],
+    labels: ["Intro", "Problem", "Gaps", "Module", "Solution", "Employee", "Path", "Skills", "Goals", "Learning", "Review", "Confirmed", "Manager", "Closing", "Thanks"],
 
     intro: {
       tag: "🏆 Hackathon 2026 · Product",
@@ -1155,39 +1155,6 @@ const slides = [
                 <div style={{ display: "inline-block", background: BRAND, borderRadius: 7, padding: "6px 14px", fontSize: 10, fontWeight: 700, color: "#fff", cursor: "pointer" }}>{c.sendBtn}</div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 6 ── IMPACTO */
-  { label: "Impacto", render: (anim, t) => {
-    const c = t.impact;
-    return (
-      <div style={{ height: "100%", background: "linear-gradient(135deg, #0a0a14 0%, #0f1520 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px" }}>
-        <div style={{ width: "100%", maxWidth: 860 }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={36}>{c.title}</SlideTitle>
-          {/* 2×2 stat grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 28, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: "all 0.5s ease 0.2s" }}>
-            {c.stats.map((s, i) => (
-              <div key={i} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: "22px 28px", textAlign: "center" }}>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 38, fontWeight: 800, color: s.numColor, lineHeight: 1 }}>
-                  {s.countTo ? <Counter target={s.countTo} suffix={s.suffix} anim={anim} color={s.numColor} /> : s.num}
-                </div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: "#fff", marginTop: 8 }}>{s.label}</div>
-                <div style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginTop: 4 }}>{s.sub}</div>
-              </div>
-            ))}
-          </div>
-          {/* Bullet list */}
-          <div style={{ marginTop: 16, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "16px 22px", display: "flex", flexDirection: "column", gap: 10, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: "all 0.5s ease 0.38s" }}>
-            {c.bullets.map((b, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "rgba(255,255,255,0.7)" }}>
-                <span style={{ color: "#22c55e", fontSize: 13 }}>✓</span>{b}
-              </div>
-            ))}
           </div>
         </div>
       </div>
