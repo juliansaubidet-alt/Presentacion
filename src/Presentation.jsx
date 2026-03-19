@@ -397,15 +397,7 @@ const slides = [
             {c.titleA}<GradText>{c.titleB}</GradText>{c.titleC}
           </div>
           <p style={{ fontSize: 16, color: "rgba(255,255,255,0.55)", lineHeight: 1.6, whiteSpace: "pre-line", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.35s" }}>{c.tagline}</p>
-          <div style={{ marginTop: 32, display: "flex", gap: 12, justifyContent: "center", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.45s" }}>
-            {c.stats.map((s, i) => (
-              <div key={i} style={{ background: "rgba(111,147,235,0.1)", border: "1px solid rgba(111,147,235,0.25)", borderRadius: 12, padding: "13px 22px", textAlign: "center" }}>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 800, color: "#a5bcf5" }}>{s.num}</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ display: "flex", gap: 14, marginTop: 24, justifyContent: "center", opacity: anim ? 1 : 0, transition: "opacity 0.6s ease 0.55s" }}>
+          <div style={{ display: "flex", gap: 14, marginTop: 32, justifyContent: "center", opacity: anim ? 1 : 0, transition: "opacity 0.6s ease 0.45s" }}>
             {[
               { href: "https://growthhub-phi.vercel.app/", label: c.demoLabel,  sub: c.demoSub },
               { href: "#",                                  label: c.videoLabel, sub: c.videoSub },
