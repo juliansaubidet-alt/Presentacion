@@ -1,117 +1,110 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
+const BRAND = "#6f93eb";
+const BG    = "#0a0a14";
+
+/* ─── HELPERS ────────────────────────────────────────────────── */
+const GridBg = () => (
+  <div style={{
+    position: "absolute", inset: 0, pointerEvents: "none",
+    backgroundImage: "linear-gradient(rgba(111,147,235,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(111,147,235,0.06) 1px, transparent 1px)",
+    backgroundSize: "48px 48px"
+  }} />
+);
+
+const GradText = ({ children }) => (
+  <span style={{ background: "linear-gradient(135deg, #6f93eb, #a5bcf5)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+    {children}
+  </span>
+);
+
+const Eyebrow = ({ children, anim, delay = 0 }) => (
+  <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "2px", color: BRAND, marginBottom: 14, fontFamily: "'DM Sans', sans-serif", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: `all 0.5s ease ${delay}s` }}>
+    {children}
+  </div>
+);
+
+const SlideTitle = ({ children, anim, delay = 0.1, size = 44 }) => (
+  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: size, fontWeight: 800, lineHeight: 1.15, color: "#fff", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: `all 0.5s ease ${delay}s` }}>
+    {children}
+  </div>
+);
+
 /* ─── TRANSLATIONS ───────────────────────────────────────────── */
 const i18n = {
   es: {
-    nav: { prev: "← Anterior", next: "Siguiente →", exit: "✕ Salir", hint: "← → navegar" },
-    labels: ["Inicio", "Problema", "Solución", "Colaborador", "Manager", "Admin", "Aprendizaje", "Equipo", "Cierre", "Gracias"],
-    cover: {
-      badge: "Módulo de Desarrollo Profesional",
-      title: "Career Path",
-      subtitle: "Planificá, desarrollá y retené el talento de tu organización",
-      hint: "→ navegá con las flechas del teclado",
+    nav: { prev: "← Anterior", next: "Siguiente →", hint: "← → navegar" },
+    labels: ["Intro", "Problema", "Gaps", "Solución", "Por qué", "Cierre", "Equipo", "Gracias"],
+
+    intro: {
+      tag: "🏆 Huckaton 2026 · Producto",
+      titleA: "Plan de ", titleB: "Carrera", titleC: "\nque realmente\nfunciona.",
+      subtitle: "Un módulo que conecta las aspiraciones del colaborador con la visión del manager, en tiempo real.",
+      meta: [{ label: "Módulo", value: "Career Path" }, { label: "Plataforma", value: "Humand" }, { label: "Año", value: "2026" }],
     },
+
     problem: {
-      badge: "EL PROBLEMA",
-      title: "El talento se va cuando\nno ve un futuro claro",
-      body: "Las empresas pierden a sus mejores colaboradores porque no tienen visibilidad sobre su crecimiento profesional.",
-      stats: [
-        { num: "76%", desc: "de empleados busca oportunidades de crecimiento", icon: "📈" },
-        { num: "94%", desc: "se quedaría más si la empresa invierte en su carrera", icon: "🏢" },
-        { num: "2x",  desc: "más retención con planes de carrera definidos",       icon: "🎯" },
+      eyebrow: "El Problema", title: "El mercado está polarizado",
+      left:  { icon: "📚", name: "Aprendizaje de Contenidos", desc: "Plataformas que proveen cursos, certificaciones y material de estudio. Foco en consumo de conocimiento.", pills: ["Coursera", "Degreed", "LinkedIn Learning"], color: "blue" },
+      gap:   "❌ GAP\nno cubierto",
+      right: { icon: "🤝", name: "Coaching Humano", desc: "Herramientas de coaching 1:1, sesiones con mentores y desarrollo liderado por personas.", pills: ["BetterUp", "Pathrise", "Lattice"], color: "green" },
+    },
+
+    gaps: {
+      eyebrow: "Insights del Benchmark", title: "5 gaps que nadie está cubriendo",
+      items: [
+        { num: "Gap 01", title: "El empleado es usuario de segunda clase",   body: "Los productos B2B requieren configuración pesada por HR antes de que el colaborador pueda usarlos." },
+        { num: "Gap 02", title: "Learning y carrera, mundos separados",       body: "El usuario aprende en un lado y gestiona su carrera en otro. Ninguna plataforma los integra con profundidad." },
+        { num: "Gap 03", title: "Solo miden dentro de la plataforma",         body: "Nadie mide lo que ocurre fuera: proyectos reales, reconocimientos externos, logros en el trabajo." },
+        { num: "Gap 04", title: "IA solo para recomendar contenido",          body: "Casi nadie usa IA para ayudar al colaborador a reflexionar sobre su carrera o co-crear su propio plan." },
+        { num: "Gap 05", title: "Sin seguimiento en tiempo real",             body: "Los planes de carrera son documentos estáticos. No hay visibilidad compartida entre colaborador y manager." },
       ],
     },
+
     solution: {
-      badge: "LA SOLUCIÓN",
-      title: "Career Path by Humand",
-      body: "Un módulo integral que conecta a colaboradores, managers y HR en un mismo ecosistema de desarrollo profesional.",
-      roles: [
-        { role: "Colaborador", color: "#4F46E5", desc: "Visualiza su ruta, identifica brechas y traza su camino", icon: "👤" },
-        { role: "Manager",     color: "#16A34A", desc: "Revisa, aprueba y da seguimiento al desarrollo de su equipo", icon: "👥" },
-        { role: "HU Admin",    color: "#7C3AED", desc: "Define roles, skills, métricas y rutas organizacionales", icon: "⚙️" },
-      ],
+      eyebrow: "La Solución", title: "Dos vistas. Un solo camino.",
+      collab: {
+        role: "Colaborador", title: "Diseñá tu propio camino",
+        features: ["Mapa visual de carrera con niveles desbloqueables", "Objetivos a corto, mediano y largo plazo", "Seguimiento de skills técnicas y soft skills", "Envío del plan al manager para revisión", "Progreso en tiempo real visible para ambas partes"],
+        levels: [{ label: "Junior\nL1", type: "done", text: "✓" }, { label: "Product\nDesigner", type: "current", text: "L2" }, { label: "Senior\nDesigner", type: "goal", text: "L3" }, { label: "Design\nLead", type: "locked", text: "🔒" }],
+      },
+      manager: {
+        role: "Manager", title: "Acompañá el desarrollo de tu equipo",
+        features: ["Vista unificada de todos los planes del equipo", "Aprobar o sugerir cambios al plan del colaborador", "Identificar brechas de skills en el equipo", "Alertas de planes sin revisar o vencidos", "Visibilidad del progreso real de cada persona"],
+        team: [
+          { name: "Luis Herrera", status: "Aprobado",    sc: "#86efac", sb: "rgba(34,197,94,0.15)",   rb: "rgba(34,197,94,0.08)",  rb2: "rgba(34,197,94,0.15)" },
+          { name: "Ana García",   status: "En revisión", sc: "#fcd34d", sb: "rgba(245,158,11,0.12)", rb: "rgba(245,158,11,0.06)", rb2: "rgba(245,158,11,0.15)" },
+          { name: "Carlos Ruiz",  status: "Sin plan",    sc: "rgba(255,255,255,0.35)", sb: "rgba(255,255,255,0.05)", rb: "rgba(255,255,255,0.03)", rb2: "rgba(255,255,255,0.06)" },
+        ],
+      },
     },
-    collaborator: {
-      badge: "COLABORADOR",
-      title: "Tu mapa de carrera personalizado",
-      features: [
-        { title: "Rol actual y meta",    desc: "Visualizá dónde estás y hacia dónde vas" },
-        { title: "Análisis de brechas",  desc: "Identificá qué skills te faltan para avanzar" },
-        { title: "Objetivos claros",     desc: "Corto, mediano y largo plazo definidos" },
-        { title: "Cursos recomendados",  desc: "Acciones concretas para crecer" },
-      ],
-      cardLevels: ["Junior", "Product", "Senior"],
+
+    diff: {
+      eyebrow: "Diferenciador", title: "¿Por qué Humand?",
+      them: { label: "El mercado hoy",       items: ["HR configura, empleado consume", "Planes estáticos en documentos", "Learning separado del desarrollo", "Sin visibilidad del manager", "IA solo recomienda cursos"] },
+      us:   { label: "Humand Career Path",   items: ["El colaborador es el protagonista", "Seguimiento en tiempo real", "Skills + objetivos integrados", "Loop manager ↔ colaborador", "Dentro del contexto organizacional"] },
     },
-    manager: {
-      badge: "MANAGER",
-      title: "Liderá el crecimiento de tu equipo",
-      features: [
-        { title: "Panel de equipo",       desc: "Visualizá el estado de cada reporte directo" },
-        { title: "Aprobación de planes",  desc: "Revisá y aprobá planes de carrera" },
-        { title: "Mapa visual",           desc: "Seguí el progreso en el career map" },
-        { title: "Feedback directo",      desc: "Sugerí cambios y enviá comentarios" },
-      ],
-      teamTitle: "Mi equipo",
-      teamSub: "5 reportes",
-      members: [
-        { name: "Ana García",   role: "Product Designer",  status: "En revisión", color: "#F59E0B" },
-        { name: "Luis Herrera", role: "Frontend Engineer", status: "Aprobado",    color: "#16A34A" },
-        { name: "Mia Torres",   role: "UX Researcher",     status: "En revisión", color: "#F59E0B" },
-        { name: "Carlos Ruiz",  role: "Backend Engineer",  status: "Sin plan",    color: "#9CA3AF" },
-      ],
-    },
-    admin: {
-      badge: "HU ADMIN",
-      title: "Configurá toda la organización",
-      features: [
-        { title: "Definir roles y niveles",  desc: "Creá la estructura de carrera por área" },
-        { title: "Skills requeridas",        desc: "Asigná habilidades técnicas y blandas por rol" },
-        { title: "Competencias",             desc: "Agrupá skills en competencias organizadas" },
-        { title: "Métricas y salud org.",    desc: "Dashboards con visibilidad total" },
-      ],
-      stats: [
-        { num: "12", label: "Rutas definidas",   icon: "🏛️" },
-        { num: "38", label: "Planes activos",    icon: "✅" },
-        { num: "7",  label: "En revisión",       icon: "🔄" },
-        { num: "4",  label: "Listos para promo", icon: "🏆" },
-      ],
-      skillsLabel: "SKILLS REQUERIDAS",
-    },
-    learning: {
-      badge: "DESARROLLO",
-      title: "Cursos y aprendizaje integrado",
-      body: "Cada plan incluye acciones concretas vinculadas al crecimiento del colaborador.",
-      courses: [
-        { type: "CURSO",         title: "Stakeholder Management Fundamentals", source: "LinkedIn Learning · 4h",  tag: "Esencial",    tagColor: "#4F46E5" },
-        { type: "CERTIFICACIÓN", title: "Advanced Design Systems",             source: "Figma Academy · 12h",     tag: "Esencial",    tagColor: "#4F46E5" },
-        { type: "CURSO",         title: "UX Research Methods",                 source: "Humand Learn · 8h",       tag: "Recomendado", tagColor: "#16A34A" },
-      ],
-      goalsTitle: "Objetivos con plazos",
-      goals: [
-        { obj: "Completar curso de UX Research", plazo: "Corto plazo",   done: true },
-        { obj: "Liderar Design Sprint Q3",        plazo: "Mediano plazo", done: false },
-        { obj: "Sesiones de mentoría (×6)",       plazo: "Mediano plazo", done: false },
-      ],
-    },
-    team: {
-      badge: "NUESTRO EQUIPO",
-      title: "Las personas detrás de Career Path",
-      body: "Un equipo multidisciplinario apasionado por el desarrollo del talento",
-      people: [
-        { name: "Angelo\nSegura",   initials: "AS", color: "#4F46E5", photo: "/angelo.jpg" },
-        { name: "Sofia\nCarro",     initials: "SC", color: "#16A34A", photo: "/sofia.png" },
-        { name: "Olivia\nCavallo",  initials: "OC", color: "#7C3AED", photo: "/olivia.jpg" },
-        { name: "Julian\nSaubidet", initials: "JS", color: "#F59E0B", photo: "/julian.jpg" },
-      ],
-    },
+
     closing: {
-      title: "Potenciá el talento.\nTransformá tu organización.",
-      body: "Career Path conecta a tu equipo con su futuro profesional, dentro de tu empresa.",
-      demoLabel: "Probá la demo",
-      demoSub: "Explorá la plataforma en vivo →",
-      videoLabel: "Video explicativo",
-      videoSub: "Mirá cómo funciona →",
+      tag: "🚀 Propuesta de Valor",
+      titleA: "Tu carrera,\n", titleB: "tu plan", titleC: ",\ntu ritmo.",
+      tagline: "El primer módulo que conecta las aspiraciones del colaborador\ncon la visión del manager, en un solo lugar y en tiempo real.",
+      stats: [{ num: "8", label: "Productos analizados" }, { num: "5", label: "Gaps identificados" }, { num: "2", label: "Vistas conectadas" }],
+      demoLabel: "Probá la demo",    demoSub: "Explorá la plataforma en vivo →",
+      videoLabel: "Video explicativo", videoSub: "Mirá cómo funciona →",
     },
+
+    team: {
+      eyebrow: "Nuestro Equipo", title: "Las personas detrás de Career Path",
+      subtitle: "Un equipo multidisciplinario apasionado por el desarrollo del talento",
+      people: [
+        { name: "Angelo\nSegura",   initials: "AS", color: "#6f93eb", photo: "/angelo.jpg" },
+        { name: "Sofia\nCarro",     initials: "SC", color: "#22c55e", photo: "/sofia.png"  },
+        { name: "Olivia\nCavallo",  initials: "OC", color: "#a78bfa", photo: "/olivia.jpg" },
+        { name: "Julian\nSaubidet", initials: "JS", color: "#f59e0b", photo: "/julian.jpg" },
+      ],
+    },
+
     thanks: {
       title: "¡Muchas gracias!",
       body: "¿Preguntas? Estamos para ayudarte a transformar el desarrollo profesional de tu organización.",
@@ -120,115 +113,78 @@ const i18n = {
   },
 
   en: {
-    nav: { prev: "← Previous", next: "Next →", exit: "✕ Exit", hint: "← → navigate" },
-    labels: ["Start", "Problem", "Solution", "Employee", "Manager", "Admin", "Learning", "Team", "Closing", "Thanks"],
-    cover: {
-      badge: "Professional Development Module",
-      title: "Career Path",
-      subtitle: "Plan, develop and retain your organization's talent",
-      hint: "→ navigate with arrow keys",
+    nav: { prev: "← Previous", next: "Next →", hint: "← → navigate" },
+    labels: ["Intro", "Problem", "Gaps", "Solution", "Why Us", "Closing", "Team", "Thanks"],
+
+    intro: {
+      tag: "🏆 Hackathon 2026 · Product",
+      titleA: "Career ", titleB: "Path", titleC: "\nthat actually\nworks.",
+      subtitle: "A module that connects employee aspirations with the manager's vision, in real time.",
+      meta: [{ label: "Module", value: "Career Path" }, { label: "Platform", value: "Humand" }, { label: "Year", value: "2026" }],
     },
+
     problem: {
-      badge: "THE PROBLEM",
-      title: "Talent leaves when\nit sees no clear future",
-      body: "Companies lose their best employees because they lack visibility into their professional growth.",
-      stats: [
-        { num: "76%", desc: "of employees seek growth opportunities",                icon: "📈" },
-        { num: "94%", desc: "would stay longer if the company invests in their career", icon: "🏢" },
-        { num: "2x",  desc: "more retention with defined career paths",               icon: "🎯" },
+      eyebrow: "The Problem", title: "The market is polarized",
+      left:  { icon: "📚", name: "Content Learning",  desc: "Platforms that provide courses, certifications and study material. Focused on knowledge consumption.", pills: ["Coursera", "Degreed", "LinkedIn Learning"], color: "blue" },
+      gap:   "❌ GAP\nnot covered",
+      right: { icon: "🤝", name: "Human Coaching", desc: "1:1 coaching tools, mentor sessions and people-led development.", pills: ["BetterUp", "Pathrise", "Lattice"], color: "green" },
+    },
+
+    gaps: {
+      eyebrow: "Benchmark Insights", title: "5 gaps nobody is covering",
+      items: [
+        { num: "Gap 01", title: "Employee is a second-class user",     body: "B2B products require heavy HR configuration before the employee can use them." },
+        { num: "Gap 02", title: "Learning and career, separate worlds", body: "Users learn in one place and manage their career in another. No platform integrates them deeply." },
+        { num: "Gap 03", title: "Only measure inside the platform",    body: "Nobody measures what happens outside: real projects, external recognition, work achievements." },
+        { num: "Gap 04", title: "AI only for content recommendations", body: "Almost nobody uses AI to help employees reflect on their career or co-create their own plan." },
+        { num: "Gap 05", title: "No real-time tracking",               body: "Career plans are static documents. No shared visibility between employee and manager." },
       ],
     },
+
     solution: {
-      badge: "THE SOLUTION",
-      title: "Career Path by Humand",
-      body: "A comprehensive module connecting employees, managers and HR in a single professional development ecosystem.",
-      roles: [
-        { role: "Employee", color: "#4F46E5", desc: "Visualizes their path, identifies gaps and charts their journey", icon: "👤" },
-        { role: "Manager",  color: "#16A34A", desc: "Reviews, approves and tracks their team's development", icon: "👥" },
-        { role: "HU Admin", color: "#7C3AED", desc: "Defines roles, skills, metrics and organizational paths", icon: "⚙️" },
-      ],
+      eyebrow: "The Solution", title: "Two views. One path.",
+      collab: {
+        role: "Employee", title: "Design your own path",
+        features: ["Visual career map with unlockable levels", "Short, medium and long-term goals", "Technical and soft skill tracking", "Send plan to manager for review", "Real-time progress visible to both parties"],
+        levels: [{ label: "Junior\nL1", type: "done", text: "✓" }, { label: "Product\nDesigner", type: "current", text: "L2" }, { label: "Senior\nDesigner", type: "goal", text: "L3" }, { label: "Design\nLead", type: "locked", text: "🔒" }],
+      },
+      manager: {
+        role: "Manager", title: "Support your team's development",
+        features: ["Unified view of all team plans", "Approve or suggest changes to the employee's plan", "Identify skill gaps across the team", "Alerts for unreviewed or overdue plans", "Visibility of each person's real progress"],
+        team: [
+          { name: "Luis Herrera", status: "Approved",     sc: "#86efac", sb: "rgba(34,197,94,0.15)",   rb: "rgba(34,197,94,0.08)",  rb2: "rgba(34,197,94,0.15)" },
+          { name: "Ana García",   status: "Under review", sc: "#fcd34d", sb: "rgba(245,158,11,0.12)", rb: "rgba(245,158,11,0.06)", rb2: "rgba(245,158,11,0.15)" },
+          { name: "Carlos Ruiz",  status: "No plan",      sc: "rgba(255,255,255,0.35)", sb: "rgba(255,255,255,0.05)", rb: "rgba(255,255,255,0.03)", rb2: "rgba(255,255,255,0.06)" },
+        ],
+      },
     },
-    collaborator: {
-      badge: "EMPLOYEE",
-      title: "Your personalized career map",
-      features: [
-        { title: "Current role & goal",      desc: "See where you are and where you're going" },
-        { title: "Gap analysis",             desc: "Identify which skills you need to advance" },
-        { title: "Clear objectives",         desc: "Short, medium and long-term goals defined" },
-        { title: "Recommended courses",      desc: "Concrete actions to grow" },
-      ],
-      cardLevels: ["Junior", "Product", "Senior"],
+
+    diff: {
+      eyebrow: "Differentiator", title: "Why Humand?",
+      them: { label: "The market today",     items: ["HR configures, employee consumes", "Static plans in documents", "Learning separate from development", "No manager visibility", "AI only recommends courses"] },
+      us:   { label: "Humand Career Path",   items: ["Employee is the protagonist", "Real-time tracking", "Skills + objectives integrated", "Manager ↔ employee loop", "Within organizational context"] },
     },
-    manager: {
-      badge: "MANAGER",
-      title: "Lead your team's growth",
-      features: [
-        { title: "Team panel",        desc: "See the status of each direct report" },
-        { title: "Plan approvals",    desc: "Review and approve career plans" },
-        { title: "Visual map",        desc: "Track progress in the career map" },
-        { title: "Direct feedback",   desc: "Suggest changes and send comments" },
-      ],
-      teamTitle: "My team",
-      teamSub: "5 reports",
-      members: [
-        { name: "Ana García",   role: "Product Designer",  status: "Under review", color: "#F59E0B" },
-        { name: "Luis Herrera", role: "Frontend Engineer", status: "Approved",     color: "#16A34A" },
-        { name: "Mia Torres",   role: "UX Researcher",     status: "Under review", color: "#F59E0B" },
-        { name: "Carlos Ruiz",  role: "Backend Engineer",  status: "No plan",      color: "#9CA3AF" },
-      ],
-    },
-    admin: {
-      badge: "HU ADMIN",
-      title: "Configure the entire organization",
-      features: [
-        { title: "Define roles & levels",  desc: "Create the career structure by area" },
-        { title: "Required skills",        desc: "Assign technical and soft skills per role" },
-        { title: "Competencies",           desc: "Group skills into organized competencies" },
-        { title: "Metrics & org health",   desc: "Dashboards with full visibility" },
-      ],
-      stats: [
-        { num: "12", label: "Defined paths",      icon: "🏛️" },
-        { num: "38", label: "Active plans",        icon: "✅" },
-        { num: "7",  label: "Under review",        icon: "🔄" },
-        { num: "4",  label: "Ready for promo",     icon: "🏆" },
-      ],
-      skillsLabel: "REQUIRED SKILLS",
-    },
-    learning: {
-      badge: "DEVELOPMENT",
-      title: "Integrated courses & learning",
-      body: "Each plan includes concrete actions linked to the employee's growth.",
-      courses: [
-        { type: "COURSE",        title: "Stakeholder Management Fundamentals", source: "LinkedIn Learning · 4h",  tag: "Essential",    tagColor: "#4F46E5" },
-        { type: "CERTIFICATION", title: "Advanced Design Systems",             source: "Figma Academy · 12h",     tag: "Essential",    tagColor: "#4F46E5" },
-        { type: "COURSE",        title: "UX Research Methods",                 source: "Humand Learn · 8h",       tag: "Recommended",  tagColor: "#16A34A" },
-      ],
-      goalsTitle: "Goals with deadlines",
-      goals: [
-        { obj: "Complete UX Research course", plazo: "Short-term",  done: true },
-        { obj: "Lead Design Sprint Q3",        plazo: "Mid-term",   done: false },
-        { obj: "Mentoring sessions (×6)",      plazo: "Mid-term",   done: false },
-      ],
-    },
-    team: {
-      badge: "OUR TEAM",
-      title: "The people behind Career Path",
-      body: "A multidisciplinary team passionate about talent development",
-      people: [
-        { name: "Angelo\nSegura",   initials: "AS", color: "#4F46E5", photo: "/angelo.jpg" },
-        { name: "Sofia\nCarro",     initials: "SC", color: "#16A34A", photo: "/sofia.png" },
-        { name: "Olivia\nCavallo",  initials: "OC", color: "#7C3AED", photo: "/olivia.jpg" },
-        { name: "Julian\nSaubidet", initials: "JS", color: "#F59E0B", photo: "/julian.jpg" },
-      ],
-    },
+
     closing: {
-      title: "Empower your talent.\nTransform your organization.",
-      body: "Career Path connects your team with their professional future, within your company.",
-      demoLabel: "Try the demo",
-      demoSub: "Explore the platform live →",
-      videoLabel: "Explainer video",
-      videoSub: "See how it works →",
+      tag: "🚀 Value Proposition",
+      titleA: "Your career,\n", titleB: "your plan", titleC: ",\nyour pace.",
+      tagline: "The first module that connects employee aspirations\nwith the manager's vision, in one place and in real time.",
+      stats: [{ num: "8", label: "Products analyzed" }, { num: "5", label: "Gaps identified" }, { num: "2", label: "Connected views" }],
+      demoLabel: "Try the demo",      demoSub: "Explore the platform live →",
+      videoLabel: "Explainer video",  videoSub: "See how it works →",
     },
+
+    team: {
+      eyebrow: "Our Team", title: "The people behind Career Path",
+      subtitle: "A multidisciplinary team passionate about talent development",
+      people: [
+        { name: "Angelo\nSegura",   initials: "AS", color: "#6f93eb", photo: "/angelo.jpg" },
+        { name: "Sofia\nCarro",     initials: "SC", color: "#22c55e", photo: "/sofia.png"  },
+        { name: "Olivia\nCavallo",  initials: "OC", color: "#a78bfa", photo: "/olivia.jpg" },
+        { name: "Julian\nSaubidet", initials: "JS", color: "#f59e0b", photo: "/julian.jpg" },
+      ],
+    },
+
     thanks: {
       title: "Thank you!",
       body: "Questions? We're here to help you transform professional development in your organization.",
@@ -237,249 +193,157 @@ const i18n = {
   },
 };
 
+/* ─── NODE STYLES (path map) ─────────────────────────────────── */
+const nodeStyle = {
+  done:    { background: "rgba(34,197,94,0.2)",    border: "2px solid #22c55e",                    color: "#22c55e" },
+  current: { background: "rgba(111,147,235,0.2)",  border: "2px solid #6f93eb",                    color: "#6f93eb" },
+  goal:    { background: "rgba(111,147,235,0.08)", border: "2px dashed rgba(111,147,235,0.4)",      color: "rgba(255,255,255,0.4)" },
+  locked:  { background: "rgba(255,255,255,0.04)", border: "2px solid rgba(255,255,255,0.1)",       color: "rgba(255,255,255,0.2)" },
+};
+const lineColor = { done: "#22c55e", current: "#6f93eb", normal: "rgba(255,255,255,0.1)" };
+
+/* ─── PILL STYLE ─────────────────────────────────────────────── */
+const pillStyle = (color) => color === "blue"
+  ? { background: "rgba(111,147,235,0.15)", color: "#a5bcf5",  border: "1px solid rgba(111,147,235,0.2)" }
+  : { background: "rgba(34,197,94,0.1)",    color: "#86efac",  border: "1px solid rgba(34,197,94,0.2)"  };
+
 /* ─── SLIDE RENDERERS ────────────────────────────────────────── */
-const slideRenderers = [
-  // 0 - COVER
-  (anim, t) => {
-    const c = t.cover;
+const slides = [
+
+  /* 0 ── INTRO */
+  { label: "Intro", render: (anim, t) => {
+    const c = t.intro;
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", background: "linear-gradient(135deg, #4F46E5 0%, #6366F1 30%, #818CF8 60%, #A5B4FC 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
-        <div style={{ position: "absolute", bottom: -120, left: -60, width: 400, height: 400, borderRadius: "50%", background: "rgba(255,255,255,0.05)" }} />
-        <div style={{ position: "absolute", top: 40, left: 40, display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", fontSize: 14 }}>hu</div>
-          <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 14, fontWeight: 500 }}>humand</span>
-        </div>
-        <div style={{ textAlign: "center", zIndex: 1, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s ease" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.15)", borderRadius: 50, padding: "8px 20px", marginBottom: 30, backdropFilter: "blur(10px)" }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 4v16"/></svg>
-            <span style={{ color: "#fff", fontSize: 14, fontWeight: 500 }}>{c.badge}</span>
+      <div style={{ height: "100%", background: "radial-gradient(ellipse at 30% 50%, #1a2a5e 0%, #0a0a14 60%)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "center", padding: 60 }}>
+        <GridBg />
+        <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(111,147,235,0.15) 0%, transparent 70%)", top: "50%", left: "30%", transform: "translate(-50%,-50%)", animation: "pulse-glow 4s ease-in-out infinite" }} />
+        <div style={{ position: "relative", zIndex: 2, maxWidth: 900 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(111,147,235,0.15)", border: "1px solid rgba(111,147,235,0.3)", borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 500, color: BRAND, marginBottom: 32, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease" }}>{c.tag}</div>
+          <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: 68, fontWeight: 800, lineHeight: 1.1, marginBottom: 24, color: "#fff", whiteSpace: "pre-line", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.15s" }}>
+            {c.titleA}<GradText>{c.titleB}</GradText>{c.titleC}
+          </h1>
+          <p style={{ fontSize: 19, color: "rgba(255,255,255,0.6)", maxWidth: 560, lineHeight: 1.6, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.3s" }}>{c.subtitle}</p>
+          <div style={{ marginTop: 48, display: "flex", gap: 32, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.45s" }}>
+            {c.meta.map((m, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                <span style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "1.5px", color: "rgba(255,255,255,0.35)" }}>{m.label}</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>{m.value}</span>
+              </div>
+            ))}
           </div>
-          <h1 style={{ color: "#fff", fontSize: 56, fontWeight: 800, margin: 0, lineHeight: 1.1, letterSpacing: -2 }}>{c.title}</h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 20, marginTop: 16, fontWeight: 400, maxWidth: 500 }}>{c.subtitle}</p>
-        </div>
-        <div style={{ position: "absolute", bottom: 80, opacity: anim ? 1 : 0, transition: "opacity 1.2s ease 0.5s" }}>
-          <span style={{ color: "rgba(255,255,255,0.5)", fontSize: 13 }}>{c.hint}</span>
         </div>
       </div>
     );
-  },
+  }},
 
-  // 1 - PROBLEM
-  (anim, t) => {
+  /* 1 ── PROBLEMA */
+  { label: "Problema", render: (anim, t) => {
     const c = t.problem;
-    return (
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%", padding: "50px 60px", background: "#fff", position: "relative" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, background: "linear-gradient(90deg, #4F46E5, #818CF8)" }} />
-        <div style={{ opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: "all 0.6s ease" }}>
-          <div style={{ display: "inline-block", background: "#FEF3C7", color: "#92400E", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, marginBottom: 24, letterSpacing: 1 }}>{c.badge}</div>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: "#1E1B4B", margin: 0, lineHeight: 1.2, whiteSpace: "pre-line" }}>{c.title}</h2>
-          <p style={{ color: "#6B7280", fontSize: 16, marginTop: 16, maxWidth: 550, lineHeight: 1.7 }}>{c.body}</p>
+    const CardSide = ({ side, dir, delay }) => (
+      <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 28, opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : `translateX(${dir})`, transition: `all 0.6s ease ${delay}s` }}>
+        <div style={{ width: 48, height: 48, borderRadius: 12, background: side.color === "blue" ? "rgba(111,147,235,0.15)" : "rgba(34,197,94,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, marginBottom: 14 }}>{side.icon}</div>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 19, fontWeight: 700, marginBottom: 8, color: "#fff" }}>{side.name}</div>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, marginBottom: 18 }}>{side.desc}</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {side.pills.map((p, i) => <span key={i} style={{ padding: "4px 12px", borderRadius: 999, fontSize: 12, fontWeight: 500, ...pillStyle(side.color) }}>{p}</span>)}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginTop: 40, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s ease 0.3s" }}>
-          {c.stats.map((s, i) => (
-            <div key={i} style={{ background: "#F5F3FF", borderRadius: 16, padding: 28, textAlign: "center" }}>
-              <div style={{ fontSize: 32, marginBottom: 8 }}>{s.icon}</div>
-              <div style={{ fontSize: 36, fontWeight: 800, color: "#4F46E5" }}>{s.num}</div>
-              <div style={{ fontSize: 13, color: "#6B7280", marginTop: 8, lineHeight: 1.5 }}>{s.desc}</div>
+      </div>
+    );
+    return (
+      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
+          <SlideTitle anim={anim}>{c.title}</SlideTitle>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", width: "100%", maxWidth: 900 }}>
+          <CardSide side={c.left}  dir="-40px" delay={0.2} />
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "0 20px", gap: 10, flexShrink: 0, width: 140, opacity: anim ? 1 : 0, transition: "opacity 0.6s ease 0.6s" }}>
+            <div style={{ width: 1, height: 56, background: "linear-gradient(to bottom, transparent, rgba(239,68,68,0.6), transparent)" }} />
+            <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 999, padding: "8px 14px", fontSize: 11, fontWeight: 600, color: "#fca5a5", textAlign: "center", whiteSpace: "pre-line", lineHeight: 1.5 }}>{c.gap}</div>
+            <div style={{ width: 1, height: 56, background: "linear-gradient(to bottom, transparent, rgba(239,68,68,0.6), transparent)" }} />
+          </div>
+          <CardSide side={c.right} dir="40px"  delay={0.4} />
+        </div>
+      </div>
+    );
+  }},
+
+  /* 2 ── GAPS */
+  { label: "Gaps", render: (anim, t) => {
+    const c = t.gaps;
+    return (
+      <div style={{ height: "100%", background: "linear-gradient(135deg, #0a0a14 0%, #0f1520 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
+          <SlideTitle anim={anim}>{c.title}</SlideTitle>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, maxWidth: 900, width: "100%" }}>
+          {c.items.map((item, i) => (
+            <div key={i} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 22, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: `all 0.5s ease ${0.1 + i * 0.08}s` }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: BRAND, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>{item.num}</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, marginBottom: 7, lineHeight: 1.3, color: "#fff" }}>{item.title}</div>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>{item.body}</p>
             </div>
           ))}
         </div>
       </div>
     );
-  },
+  }},
 
-  // 2 - SOLUTION
-  (anim, t) => {
+  /* 3 ── SOLUCIÓN */
+  { label: "Solución", render: (anim, t) => {
     const c = t.solution;
     return (
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%", padding: "50px 60px", background: "linear-gradient(180deg, #EEF2FF 0%, #fff 100%)" }}>
-        <div style={{ opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: "all 0.6s ease" }}>
-          <div style={{ display: "inline-block", background: "#DBEAFE", color: "#1E40AF", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, marginBottom: 24, letterSpacing: 1 }}>{c.badge}</div>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: "#1E1B4B", margin: 0 }}>{c.title}</h2>
-          <p style={{ color: "#6B7280", fontSize: 16, marginTop: 12, maxWidth: 600, lineHeight: 1.7 }}>{c.body}</p>
+      <div style={{ height: "100%", background: "radial-gradient(ellipse at 70% 30%, #1a3060 0%, #0a0a14 60%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px" }}>
+        <div style={{ textAlign: "center", marginBottom: 24 }}>
+          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
+          <SlideTitle anim={anim} size={38}>{c.title}</SlideTitle>
         </div>
-        <div style={{ display: "flex", gap: 16, marginTop: 36, opacity: anim ? 1 : 0, transition: "all 0.8s ease 0.3s" }}>
-          {c.roles.map((r, i) => (
-            <div key={i} style={{ flex: 1, background: "#fff", borderRadius: 16, padding: 28, boxShadow: "0 1px 3px rgba(0,0,0,0.08)", borderTop: `4px solid ${r.color}` }}>
-              <div style={{ fontSize: 28, marginBottom: 12 }}>{r.icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#1E1B4B" }}>{r.role}</div>
-              <div style={{ fontSize: 13, color: "#6B7280", marginTop: 8, lineHeight: 1.6 }}>{r.desc}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, maxWidth: 900, width: "100%", alignItems: "start" }}>
+          {/* Collaborator */}
+          <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: 24, opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(-30px)", transition: "all 0.6s ease 0.2s" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", borderRadius: 999, background: "rgba(111,147,235,0.15)", color: "#a5bcf5", fontSize: 12, fontWeight: 600, marginBottom: 14 }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: BRAND }} />{c.collab.role}
             </div>
-          ))}
-        </div>
-      </div>
-    );
-  },
-
-  // 3 - COLLABORATOR
-  (anim, t) => {
-    const c = t.collaborator;
-    return (
-      <div style={{ display: "flex", height: "100%", background: "#fff" }}>
-        <div style={{ flex: 1, padding: "50px 40px 50px 60px", display: "flex", flexDirection: "column", justifyContent: "center", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(-20px)", transition: "all 0.7s ease" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#EEF2FF", color: "#4F46E5", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, marginBottom: 20, letterSpacing: 1, width: "fit-content" }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#4F46E5" }} />{c.badge}
-          </div>
-          <h2 style={{ fontSize: 30, fontWeight: 800, color: "#1E1B4B", margin: 0, lineHeight: 1.2 }}>{c.title}</h2>
-          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 16 }}>
-            {c.features.map((f, i) => (
-              <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                <div style={{ minWidth: 32, height: 32, borderRadius: 8, background: "#EEF2FF", display: "flex", alignItems: "center", justifyContent: "center", color: "#4F46E5", fontWeight: 700, fontSize: 14 }}>✓</div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1E1B4B" }}>{f.title}</div>
-                  <div style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>{f.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 30, opacity: anim ? 1 : 0, transition: "opacity 0.8s ease 0.4s" }}>
-          <div style={{ background: "#F9FAFB", borderRadius: 20, padding: 30, width: "100%", maxWidth: 380, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
-            <div style={{ background: "linear-gradient(135deg, #4F46E5, #818CF8)", borderRadius: 14, padding: 20, color: "#fff", marginBottom: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.8, letterSpacing: 1 }}>CURRENT ROLE</div>
-              <div style={{ fontSize: 20, fontWeight: 800, marginTop: 4 }}>Product Designer</div>
-              <div style={{ fontSize: 13, opacity: 0.8 }}>Design Team</div>
-              <div style={{ display: "inline-block", background: "rgba(255,255,255,0.2)", borderRadius: 20, padding: "4px 12px", fontSize: 12, marginTop: 10 }}>2.5 yr tenure</div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center" }}>
-              {["L1", "L2", "L3"].map((l, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: "50%", border: `3px solid ${i < 2 ? "#16A34A" : "#4F46E5"}`, background: i === 0 ? "#16A34A" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: i === 0 ? "#fff" : i === 1 ? "#16A34A" : "#4F46E5" }}>
-                    {i === 0 ? "✓" : l}
+            <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 14, lineHeight: 1.2, color: "#fff" }}>{c.collab.title}</h3>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
+              {c.collab.features.map((f, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND, marginTop: 5, flexShrink: 0 }} />{f}
+                </li>
+              ))}
+            </ul>
+            {/* Path map */}
+            <div style={{ display: "flex", alignItems: "center", marginTop: 18, gap: 0 }}>
+              {c.collab.levels.map((node, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, fontFamily: "'Inter', sans-serif", ...nodeStyle[node.type] }}>{node.text}</div>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "center", whiteSpace: "pre-line", lineHeight: 1.3 }}>{node.label}</div>
                   </div>
-                  {i < 2 && <div style={{ width: 30, height: 3, background: i === 0 ? "#16A34A" : "#D1D5DB", borderRadius: 2 }} />}
+                  {i < c.collab.levels.length - 1 && <div style={{ width: 20, height: 2, flexShrink: 0, background: i === 0 ? lineColor.done : i === 1 ? lineColor.current : lineColor.normal }} />}
                 </div>
               ))}
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#9CA3AF", marginTop: 6, padding: "0 4px" }}>
-              {c.cardLevels.map((l, i) => <span key={i}>{l}</span>)}
+          </div>
+          {/* Manager */}
+          <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: 24, opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.4s" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", borderRadius: 999, background: "rgba(34,197,94,0.1)", color: "#86efac", fontSize: 12, fontWeight: 600, marginBottom: 14 }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e" }} />{c.manager.role}
             </div>
-          </div>
-        </div>
-      </div>
-    );
-  },
-
-  // 4 - MANAGER
-  (anim, t) => {
-    const c = t.manager;
-    return (
-      <div style={{ display: "flex", height: "100%", background: "#fff" }}>
-        <div style={{ flex: 1, padding: "50px 40px 50px 60px", display: "flex", flexDirection: "column", justifyContent: "center", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(-20px)", transition: "all 0.7s ease" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F0FDF4", color: "#16A34A", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, marginBottom: 20, letterSpacing: 1, width: "fit-content" }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#16A34A" }} />{c.badge}
-          </div>
-          <h2 style={{ fontSize: 30, fontWeight: 800, color: "#1E1B4B", margin: 0, lineHeight: 1.2 }}>{c.title}</h2>
-          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 16 }}>
-            {c.features.map((f, i) => (
-              <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                <div style={{ minWidth: 32, height: 32, borderRadius: 8, background: "#F0FDF4", display: "flex", alignItems: "center", justifyContent: "center", color: "#16A34A", fontWeight: 700, fontSize: 14 }}>✓</div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1E1B4B" }}>{f.title}</div>
-                  <div style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>{f.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 30, opacity: anim ? 1 : 0, transition: "opacity 0.8s ease 0.4s" }}>
-          <div style={{ background: "#F9FAFB", borderRadius: 20, padding: 24, width: "100%", maxWidth: 360, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#1E1B4B", marginBottom: 16 }}>{c.teamTitle} <span style={{ color: "#9CA3AF", fontWeight: 400 }}>{c.teamSub}</span></div>
-            {c.members.map((m, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: i < 3 ? "1px solid #F3F4F6" : "none" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#EEF2FF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#4F46E5" }}>{m.name.split(" ").map(n => n[0]).join("")}</div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: "#1E1B4B" }}>{m.name}</div>
-                    <div style={{ fontSize: 11, color: "#9CA3AF" }}>{m.role}</div>
-                  </div>
-                </div>
-                <div style={{ fontSize: 11, fontWeight: 600, color: m.color }}>{m.status}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  },
-
-  // 5 - ADMIN
-  (anim, t) => {
-    const c = t.admin;
-    return (
-      <div style={{ display: "flex", height: "100%", background: "#fff" }}>
-        <div style={{ flex: 1, padding: "50px 40px 50px 60px", display: "flex", flexDirection: "column", justifyContent: "center", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(-20px)", transition: "all 0.7s ease" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#F5F3FF", color: "#7C3AED", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, marginBottom: 20, letterSpacing: 1, width: "fit-content" }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#7C3AED" }} />{c.badge}
-          </div>
-          <h2 style={{ fontSize: 30, fontWeight: 800, color: "#1E1B4B", margin: 0, lineHeight: 1.2 }}>{c.title}</h2>
-          <div style={{ marginTop: 28, display: "flex", flexDirection: "column", gap: 16 }}>
-            {c.features.map((f, i) => (
-              <div key={i} style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                <div style={{ minWidth: 32, height: 32, borderRadius: 8, background: "#F5F3FF", display: "flex", alignItems: "center", justifyContent: "center", color: "#7C3AED", fontWeight: 700, fontSize: 14 }}>✓</div>
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#1E1B4B" }}>{f.title}</div>
-                  <div style={{ fontSize: 13, color: "#6B7280", marginTop: 2 }}>{f.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 30, opacity: anim ? 1 : 0, transition: "opacity 0.8s ease 0.4s" }}>
-          <div style={{ background: "#F9FAFB", borderRadius: 20, padding: 24, width: "100%", maxWidth: 360, boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-              {c.stats.map((s, i) => (
-                <div key={i} style={{ background: "#fff", borderRadius: 12, padding: 14, textAlign: "center", border: "1px solid #F3F4F6" }}>
-                  <div style={{ fontSize: 18 }}>{s.icon}</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: "#4F46E5" }}>{s.num}</div>
-                  <div style={{ fontSize: 10, color: "#9CA3AF" }}>{s.label}</div>
-                </div>
+            <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 14, lineHeight: 1.2, color: "#fff" }}>{c.manager.title}</h3>
+            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
+              {c.manager.features.map((f, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND, marginTop: 5, flexShrink: 0 }} />{f}
+                </li>
               ))}
-            </div>
-            <div style={{ background: "#fff", borderRadius: 12, padding: 14, border: "1px solid #F3F4F6" }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#9CA3AF", letterSpacing: 1, marginBottom: 10 }}>{c.skillsLabel}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {["Visual Design", "Prototyping", "UX Research", "Figma Advanced", "Design Systems"].map((s, i) => (
-                  <span key={i} style={{ background: "#EEF2FF", color: "#4F46E5", fontSize: 10, padding: "4px 10px", borderRadius: 20, fontWeight: 600 }}>{s}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  },
-
-  // 6 - LEARNING
-  (anim, t) => {
-    const c = t.learning;
-    return (
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", height: "100%", padding: "50px 60px", background: "#fff" }}>
-        <div style={{ opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: "all 0.6s ease" }}>
-          <div style={{ display: "inline-block", background: "#FEF3C7", color: "#92400E", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, marginBottom: 24, letterSpacing: 1 }}>{c.badge}</div>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: "#1E1B4B", margin: 0 }}>{c.title}</h2>
-          <p style={{ color: "#6B7280", fontSize: 15, marginTop: 10, lineHeight: 1.6 }}>{c.body}</p>
-        </div>
-        <div style={{ display: "flex", gap: 20, marginTop: 36, opacity: anim ? 1 : 0, transition: "all 0.8s ease 0.3s" }}>
-          {c.courses.map((course, i) => (
-            <div key={i} style={{ flex: 1, background: "#F9FAFB", borderRadius: 16, padding: 24, border: "1px solid #F3F4F6", position: "relative" }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: "#9CA3AF", letterSpacing: 1, marginBottom: 8 }}>{course.type}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#1E1B4B", lineHeight: 1.3 }}>{course.title}</div>
-              <div style={{ fontSize: 13, color: "#9CA3AF", marginTop: 8 }}>{course.source}</div>
-              <div style={{ position: "absolute", top: 20, right: 20, fontSize: 11, fontWeight: 600, color: course.tagColor, background: course.tagColor + "15", padding: "3px 10px", borderRadius: 20 }}>{course.tag}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ display: "flex", gap: 20, marginTop: 24, opacity: anim ? 1 : 0, transition: "all 0.8s ease 0.5s" }}>
-          <div style={{ flex: 1, background: "#F5F3FF", borderRadius: 16, padding: 24 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#1E1B4B" }}>{c.goalsTitle}</div>
-            <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
-              {c.goals.map((o, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 13 }}>
-                  <div style={{ width: 20, height: 20, borderRadius: 4, border: `2px solid ${o.done ? "#4F46E5" : "#D1D5DB"}`, background: o.done ? "#4F46E5" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 10 }}>{o.done ? "✓" : ""}</div>
-                  <span style={{ color: "#374151", flex: 1 }}>{o.obj}</span>
-                  <span style={{ fontSize: 11, color: "#F59E0B", fontWeight: 600 }}>{o.plazo}</span>
+            </ul>
+            <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 7 }}>
+              {c.manager.team.map((m, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 13px", background: m.rb, border: `1px solid ${m.rb2}`, borderRadius: 8 }}>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.8)" }}>{m.name}</span>
+                  <span style={{ fontSize: 11, color: m.sc, fontWeight: 600, background: m.sb, padding: "2px 10px", borderRadius: 999 }}>{m.status}</span>
                 </div>
               ))}
             </div>
@@ -487,98 +351,134 @@ const slideRenderers = [
         </div>
       </div>
     );
-  },
+  }},
 
-  // 7 - TEAM
-  (anim, t) => {
-    const c = t.team;
+  /* 4 ── DIFERENCIADOR */
+  { label: "Por qué", render: (anim, t) => {
+    const c = t.diff;
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", background: "linear-gradient(180deg, #EEF2FF 0%, #fff 100%)", padding: "50px 60px" }}>
-        <div style={{ textAlign: "center", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: "all 0.6s ease" }}>
-          <div style={{ display: "inline-block", background: "#DBEAFE", color: "#1E40AF", fontSize: 12, fontWeight: 700, padding: "6px 14px", borderRadius: 6, marginBottom: 24, letterSpacing: 1 }}>{c.badge}</div>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: "#1E1B4B", margin: 0 }}>{c.title}</h2>
-          <p style={{ color: "#6B7280", fontSize: 15, marginTop: 10 }}>{c.body}</p>
+      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
+        <div style={{ textAlign: "center", marginBottom: 44 }}>
+          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
+          <SlideTitle anim={anim}>{c.title}</SlideTitle>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 24, marginTop: 48, width: "100%", maxWidth: 720, opacity: anim ? 1 : 0, transition: "all 0.8s ease 0.3s" }}>
-          {c.people.map((p, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ width: 100, height: 100, borderRadius: "50%", background: p.photo ? "transparent" : `linear-gradient(135deg, ${p.color}, ${p.color}99)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", fontSize: 30, fontWeight: 800, color: "#fff", boxShadow: `0 8px 24px ${p.color}33`, overflow: "hidden" }}>
-                {p.photo ? <img src={p.photo} alt={p.initials} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} /> : p.initials}
+        <div style={{ display: "flex", alignItems: "center", gap: 20, width: "100%", maxWidth: 860, opacity: anim ? 1 : 0, transition: "opacity 0.6s ease 0.3s" }}>
+          <div style={{ flex: 1, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 16, padding: 28 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1.5px", color: "rgba(255,255,255,0.35)", marginBottom: 20 }}>{c.them.label}</div>
+            {c.them.items.map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, marginBottom: 14, color: "rgba(255,255,255,0.6)" }}>
+                <span>❌</span>{item}
               </div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "#1E1B4B", marginTop: 14, whiteSpace: "pre-line", lineHeight: 1.3 }}>{p.name}</div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.4)", flexShrink: 0 }}>VS</div>
+          <div style={{ flex: 1, background: "rgba(111,147,235,0.05)", border: "1px solid rgba(111,147,235,0.3)", borderRadius: 16, padding: 28 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1.5px", color: BRAND, marginBottom: 20 }}>{c.us.label}</div>
+            {c.us.items.map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, marginBottom: 14, color: "rgba(255,255,255,0.88)" }}>
+                <span>✅</span>{item}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
-  },
+  }},
 
-  // 8 - CLOSING
-  (anim, t) => {
+  /* 5 ── CIERRE */
+  { label: "Cierre", render: (anim, t) => {
     const c = t.closing;
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", background: "linear-gradient(135deg, #4F46E5 0%, #6366F1 30%, #818CF8 60%, #A5B4FC 100%)", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -100, right: -100, width: 350, height: 350, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
-        <div style={{ position: "absolute", bottom: -80, left: -80, width: 300, height: 300, borderRadius: "50%", background: "rgba(255,255,255,0.04)" }} />
-        <div style={{ textAlign: "center", zIndex: 1, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(30px)", transition: "all 0.8s ease" }}>
-          <h1 style={{ color: "#fff", fontSize: 48, fontWeight: 800, margin: 0, lineHeight: 1.1, whiteSpace: "pre-line" }}>{c.title}</h1>
-          <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 18, marginTop: 20, maxWidth: 500, margin: "20px auto 0" }}>{c.body}</p>
-          <div style={{ display: "flex", gap: 16, marginTop: 36, justifyContent: "center" }}>
+      <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 50%, #1a2a5e 0%, #0a0a14 65%)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
+        <GridBg />
+        <div style={{ position: "relative", zIndex: 2, textAlign: "center", maxWidth: 700 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(111,147,235,0.15)", border: "1px solid rgba(111,147,235,0.3)", borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 500, color: BRAND, marginBottom: 16, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease" }}>{c.tag}</div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 52, fontWeight: 800, lineHeight: 1.15, margin: "16px 0 20px", whiteSpace: "pre-line", color: "#fff", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.2s" }}>
+            {c.titleA}<GradText>{c.titleB}</GradText>{c.titleC}
+          </div>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.55)", lineHeight: 1.6, whiteSpace: "pre-line", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.35s" }}>{c.tagline}</p>
+          <div style={{ marginTop: 32, display: "flex", gap: 12, justifyContent: "center", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.45s" }}>
+            {c.stats.map((s, i) => (
+              <div key={i} style={{ background: "rgba(111,147,235,0.1)", border: "1px solid rgba(111,147,235,0.25)", borderRadius: 12, padding: "13px 22px", textAlign: "center" }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 26, fontWeight: 800, color: "#a5bcf5" }}>{s.num}</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 14, marginTop: 24, justifyContent: "center", opacity: anim ? 1 : 0, transition: "opacity 0.6s ease 0.55s" }}>
             {[
-              { href: "https://growthhub-phi.vercel.app/", label: c.demoLabel, sub: c.demoSub },
-              { href: "#", label: c.videoLabel, sub: c.videoSub },
+              { href: "https://growthhub-phi.vercel.app/", label: c.demoLabel,  sub: c.demoSub },
+              { href: "#",                                  label: c.videoLabel, sub: c.videoSub },
             ].map((btn, i) => (
-              <a
-                key={i}
-                href={btn.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4, width: 200, background: "#fff", borderRadius: 16, padding: "16px 0", textDecoration: "none", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.3)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.2)"; }}
+              <a key={i} href={btn.href} target="_blank" rel="noopener noreferrer"
+                style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, width: 196, background: "#fff", borderRadius: 14, padding: "14px 0", textDecoration: "none", boxShadow: "0 8px 24px rgba(0,0,0,0.3)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 14px 36px rgba(0,0,0,0.4)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)"; }}
               >
-                <span style={{ fontSize: 17, fontWeight: 800, color: "#4F46E5" }}>{btn.label}</span>
-                <span style={{ fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}>{btn.sub}</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 800, color: "#213478" }}>{btn.label}</span>
+                <span style={{ fontSize: 11, color: "#9CA3AF", fontWeight: 500 }}>{btn.sub}</span>
               </a>
             ))}
           </div>
         </div>
       </div>
     );
-  },
+  }},
 
-  // 9 - THANKS
-  (anim, t) => {
+  /* 6 ── EQUIPO */
+  { label: "Equipo", render: (anim, t) => {
+    const c = t.team;
+    return (
+      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
+        <div style={{ textAlign: "center", marginBottom: 44 }}>
+          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
+          <SlideTitle anim={anim}>{c.title}</SlideTitle>
+          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 15, marginTop: 10, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 36, maxWidth: 720, opacity: anim ? 1 : 0, transition: "opacity 0.8s ease 0.3s" }}>
+          {c.people.map((p, i) => (
+            <div key={i} style={{ textAlign: "center" }}>
+              <div style={{ width: 104, height: 104, borderRadius: "50%", background: p.photo ? "transparent" : `linear-gradient(135deg, ${p.color}, ${p.color}99)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", fontSize: 28, fontWeight: 800, color: "#fff", boxShadow: `0 8px 28px ${p.color}44`, overflow: "hidden", border: `3px solid ${p.color}44` }}>
+                {p.photo ? <img src={p.photo} alt={p.initials} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} /> : p.initials}
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: "#fff", marginTop: 14, whiteSpace: "pre-line", lineHeight: 1.35 }}>{p.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }},
+
+  /* 7 ── GRACIAS */
+  { label: "Gracias", render: (anim, t) => {
     const c = t.thanks;
     const people = t.team.people;
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", background: "#fff", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: -150, right: -150, width: 400, height: 400, borderRadius: "50%", background: "linear-gradient(135deg, #EEF2FF, #F5F3FF)", opacity: 0.6 }} />
-        <div style={{ position: "absolute", bottom: -100, left: -100, width: 300, height: 300, borderRadius: "50%", background: "linear-gradient(135deg, #F0FDF4, #EEF2FF)", opacity: 0.5 }} />
-        <div style={{ textAlign: "center", zIndex: 1, opacity: anim ? 1 : 0, transform: anim ? "scale(1)" : "scale(0.9)", transition: "all 0.8s ease" }}>
-          <div style={{ width: 80, height: 80, borderRadius: 20, background: "linear-gradient(135deg, #4F46E5, #818CF8)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 30px", boxShadow: "0 12px 40px rgba(79,70,229,0.3)" }}>
-            <span style={{ color: "#fff", fontSize: 28, fontWeight: 800 }}>hu</span>
+      <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 50%, #1a2a5e 0%, #0a0a14 65%)", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <GridBg />
+        <div style={{ position: "relative", zIndex: 2, textAlign: "center", opacity: anim ? 1 : 0, transform: anim ? "scale(1)" : "scale(0.95)", transition: "all 0.8s ease" }}>
+          <div style={{ width: 72, height: 72, borderRadius: 18, background: "rgba(111,147,235,0.2)", border: "1px solid rgba(111,147,235,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 28px", boxShadow: "0 12px 40px rgba(111,147,235,0.25)" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", color: "#a5bcf5", fontSize: 22, fontWeight: 800 }}>hu</span>
           </div>
-          <h1 style={{ fontSize: 52, fontWeight: 800, color: "#1E1B4B", margin: 0, lineHeight: 1.1 }}>{c.title}</h1>
-          <p style={{ color: "#6B7280", fontSize: 18, marginTop: 16, maxWidth: 450, margin: "16px auto 0", lineHeight: 1.6 }}>{c.body}</p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 36 }}>
+          <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: 48, fontWeight: 800, color: "#fff", margin: 0, lineHeight: 1.1 }}>{c.title}</h1>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 17, marginTop: 16, maxWidth: 460, margin: "16px auto 0", lineHeight: 1.6 }}>{c.body}</p>
+          <div style={{ display: "flex", gap: 24, justifyContent: "center", marginTop: 36 }}>
             {people.map((p, i) => (
-              <div key={i} style={{ width: 44, height: 44, borderRadius: "50%", background: p.photo ? "transparent" : `linear-gradient(135deg, ${p.color}, ${p.color}99)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff", boxShadow: `0 4px 12px ${p.color}33`, overflow: "hidden" }}>
-                {p.photo ? <img src={p.photo} alt={p.initials} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} /> : p.initials}
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: p.photo ? "transparent" : `linear-gradient(135deg, ${p.color}, ${p.color}99)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#fff", boxShadow: `0 4px 14px ${p.color}44`, overflow: "hidden", border: `2px solid ${p.color}44` }}>
+                  {p.photo ? <img src={p.photo} alt={p.initials} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} /> : p.initials}
+                </div>
+                <span style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, fontWeight: 500, whiteSpace: "pre-line", textAlign: "center", lineHeight: 1.3 }}>{p.name}</span>
               </div>
             ))}
-          </div>
-          <div style={{ color: "#9CA3AF", fontSize: 13, marginTop: 16 }}>{c.names}</div>
-          <div style={{ marginTop: 36, display: "inline-flex", alignItems: "center", gap: 8, background: "#F5F3FF", borderRadius: 50, padding: "10px 24px" }}>
-            <span style={{ fontSize: 14, color: "#4F46E5", fontWeight: 600 }}>humand.co</span>
           </div>
         </div>
       </div>
     );
-  },
+  }},
 ];
 
-const TOTAL = slideRenderers.length;
+const TOTAL = slides.length;
 
 /* ─── MAIN COMPONENT ─────────────────────────────────────────── */
 export default function Presentation() {
@@ -591,23 +491,18 @@ export default function Presentation() {
 
   const t = i18n[lang];
 
-  // Boot animation
   useEffect(() => {
     const id = setTimeout(() => setAnim(true), 100);
     return () => clearTimeout(id);
   }, []);
 
-  // Auto-hide bottom bar after 3s of inactivity
   const showBar = useCallback(() => {
     setBarVisible(true);
     clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setBarVisible(false), 3000);
+    hideTimer.current = setTimeout(() => setBarVisible(false), 3200);
   }, []);
 
-  useEffect(() => {
-    showBar();
-    return () => clearTimeout(hideTimer.current);
-  }, [current, showBar]);
+  useEffect(() => { showBar(); return () => clearTimeout(hideTimer.current); }, [current, showBar]);
 
   const goTo = useCallback((idx) => {
     if (idx === current || idx < 0 || idx >= TOTAL || transitioning) return;
@@ -616,112 +511,75 @@ export default function Presentation() {
     setTimeout(() => {
       setCurrent(idx);
       setTimeout(() => { setAnim(true); setTrans(false); }, 50);
-    }, 300);
+    }, 280);
   }, [current, transitioning]);
 
   useEffect(() => {
-    const handleKey = (e) => {
+    const h = (e) => {
       if (e.key === "ArrowRight" || e.key === " ") goTo(current + 1);
       if (e.key === "ArrowLeft") goTo(current - 1);
       showBar();
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [current, goTo, showBar]);
 
   const progress = ((current + 1) / TOTAL) * 100;
 
   return (
-    <div
-      onMouseMove={showBar}
-      style={{ width: "100vw", height: "100vh", overflow: "hidden", background: "#000", position: "relative", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", cursor: barVisible ? "default" : "none" }}
-    >
+    <div onMouseMove={showBar} style={{ width: "100vw", height: "100vh", overflow: "hidden", background: BG, position: "relative", fontFamily: "'DM Sans', sans-serif", cursor: barVisible ? "default" : "none" }}>
+
       {/* ── SLIDE ── */}
       <div style={{ position: "absolute", inset: 0 }}>
-        {slideRenderers[current](anim, t)}
+        {slides[current].render(anim, t)}
       </div>
 
       {/* ── TOP HUD ── */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 100%)", opacity: barVisible ? 1 : 0, transition: "opacity 0.4s ease", pointerEvents: barVisible ? "auto" : "none" }}>
-        {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 8, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, color: "#fff", fontSize: 11, backdropFilter: "blur(8px)" }}>hu</div>
-          <span style={{ color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600 }}>Career Path</span>
-        </div>
-
-        {/* Slide label */}
-        <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", background: "rgba(0,0,0,0.2)", padding: "4px 12px", borderRadius: 20, backdropFilter: "blur(8px)" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 24px", background: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 100%)", opacity: barVisible ? 1 : 0, transition: "opacity 0.4s ease", pointerEvents: barVisible ? "auto" : "none" }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 17, fontWeight: 700, color: "rgba(255,255,255,0.8)", letterSpacing: "-0.5px" }}>humand</div>
+        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.5)", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", background: "rgba(0,0,0,0.35)", padding: "4px 12px", borderRadius: 20, backdropFilter: "blur(8px)" }}>
           {t.labels[current]}
         </span>
-
-        {/* Lang toggle */}
-        <div style={{ display: "flex", background: "rgba(0,0,0,0.3)", borderRadius: 20, padding: 3, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)" }}>
+        <div style={{ display: "flex", background: "rgba(0,0,0,0.4)", borderRadius: 20, padding: 3, backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.1)" }}>
           {["es", "en"].map((l) => (
-            <button
-              key={l}
-              onClick={() => setLang(l)}
-              style={{ padding: "5px 14px", borderRadius: 16, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, transition: "all 0.2s", background: lang === l ? "#4F46E5" : "transparent", color: lang === l ? "#fff" : "rgba(255,255,255,0.5)" }}
-            >
+            <button key={l} onClick={() => setLang(l)} style={{ padding: "5px 14px", borderRadius: 16, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: 0.5, transition: "all 0.2s", background: lang === l ? BRAND : "transparent", color: lang === l ? "#fff" : "rgba(255,255,255,0.45)" }}>
               {l.toUpperCase()}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── NAV ARROWS ── */}
-      <button
-        onClick={() => goTo(current - 1)}
-        disabled={current === 0}
-        style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.3)", border: "none", borderRadius: "50%", width: 44, height: 44, color: "#fff", fontSize: 22, cursor: current === 0 ? "default" : "pointer", opacity: barVisible ? (current === 0 ? 0.25 : 0.7) : 0, transition: "opacity 0.4s ease", zIndex: 50, backdropFilter: "blur(8px)", pointerEvents: barVisible && current > 0 ? "auto" : "none" }}
-      >‹</button>
-      <button
-        onClick={() => goTo(current + 1)}
-        disabled={current === TOTAL - 1}
-        style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.3)", border: "none", borderRadius: "50%", width: 44, height: 44, color: "#fff", fontSize: 22, cursor: current === TOTAL - 1 ? "default" : "pointer", opacity: barVisible ? (current === TOTAL - 1 ? 0.25 : 0.7) : 0, transition: "opacity 0.4s ease", zIndex: 50, backdropFilter: "blur(8px)", pointerEvents: barVisible && current < TOTAL - 1 ? "auto" : "none" }}
-      >›</button>
+      {/* ── SIDE ARROWS ── */}
+      {[-1, 1].map((dir) => {
+        const idx   = current + dir;
+        const valid = idx >= 0 && idx < TOTAL;
+        const isL   = dir === -1;
+        return (
+          <button key={dir} onClick={() => goTo(idx)} disabled={!valid} style={{ position: "absolute", [isL ? "left" : "right"]: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "50%", width: 44, height: 44, color: "#fff", fontSize: 22, cursor: valid ? "pointer" : "default", opacity: barVisible ? (valid ? 0.75 : 0.2) : 0, transition: "opacity 0.4s ease", zIndex: 50, backdropFilter: "blur(8px)", pointerEvents: barVisible && valid ? "auto" : "none" }}>
+            {isL ? "‹" : "›"}
+          </button>
+        );
+      })}
 
       {/* ── BOTTOM BAR ── */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 50, background: "linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%)", padding: "20px 20px 12px", opacity: barVisible ? 1 : 0, transition: "opacity 0.4s ease", pointerEvents: barVisible ? "auto" : "none" }}>
-        {/* Progress bar */}
-        <div style={{ height: 2, background: "rgba(255,255,255,0.15)", borderRadius: 1, marginBottom: 12, overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #4F46E5, #818CF8)", borderRadius: 1, transition: "width 0.4s ease" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 50, background: "linear-gradient(0deg, rgba(0,0,0,0.85) 0%, transparent 100%)", padding: "20px 20px 12px", opacity: barVisible ? 1 : 0, transition: "opacity 0.4s ease", pointerEvents: barVisible ? "auto" : "none" }}>
+        {/* Progress */}
+        <div style={{ height: 2, background: "rgba(255,255,255,0.1)", borderRadius: 1, marginBottom: 12, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${progress}%`, background: `linear-gradient(90deg, ${BRAND}, #a5bcf5)`, borderRadius: 1, transition: "width 0.4s ease" }} />
         </div>
-
-        {/* Thumbnails row */}
+        {/* Controls */}
         <div style={{ display: "flex", alignItems: "center", gap: 6, justifyContent: "center" }}>
-          {/* Prev */}
-          <button
-            onClick={() => goTo(current - 1)}
-            disabled={current === 0}
-            style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, padding: "6px 14px", color: current === 0 ? "rgba(255,255,255,0.25)" : "#fff", fontSize: 12, fontWeight: 600, cursor: current === 0 ? "default" : "pointer", transition: "all 0.2s", backdropFilter: "blur(8px)", whiteSpace: "nowrap" }}
-          >{t.nav.prev}</button>
-
-          {/* Slide thumbnails */}
-          <div style={{ display: "flex", gap: 5, overflowX: "auto", maxWidth: "calc(100vw - 220px)", padding: "2px 4px" }}>
+          <button onClick={() => goTo(current - 1)} disabled={current === 0} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, padding: "6px 14px", color: current === 0 ? "rgba(255,255,255,0.2)" : "#fff", fontSize: 12, fontWeight: 600, cursor: current === 0 ? "default" : "pointer", backdropFilter: "blur(8px)", whiteSpace: "nowrap" }}>{t.nav.prev}</button>
+          <div style={{ display: "flex", gap: 5, overflowX: "auto", maxWidth: "calc(100vw - 230px)", padding: "2px 4px" }}>
             {t.labels.map((label, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                title={label}
-                style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", width: 68, height: 40, borderRadius: 8, border: `2px solid ${i === current ? "#4F46E5" : "rgba(255,255,255,0.12)"}`, background: i === current ? "rgba(79,70,229,0.3)" : i < current ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.04)", cursor: "pointer", transition: "all 0.25s", padding: "0 4px 4px", backdropFilter: "blur(4px)" }}
-              >
-                <span style={{ fontSize: 8, fontWeight: 700, color: i === current ? "#fff" : "rgba(255,255,255,0.45)", textAlign: "center", letterSpacing: 0.3, lineHeight: 1.2 }}>{i + 1}. {label}</span>
+              <button key={i} onClick={() => goTo(i)} title={label} style={{ flex: "0 0 auto", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", width: 72, height: 42, borderRadius: 8, border: `1.5px solid ${i === current ? BRAND : "rgba(255,255,255,0.1)"}`, background: i === current ? "rgba(111,147,235,0.18)" : i < current ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.02)", cursor: "pointer", transition: "all 0.25s", padding: "0 4px 5px", backdropFilter: "blur(4px)" }}>
+                <span style={{ fontSize: 8, fontWeight: 600, color: i === current ? "#a5bcf5" : "rgba(255,255,255,0.38)", textAlign: "center" }}>{i + 1}. {label}</span>
               </button>
             ))}
           </div>
-
-          {/* Next */}
-          <button
-            onClick={() => goTo(current + 1)}
-            disabled={current === TOTAL - 1}
-            style={{ background: current === TOTAL - 1 ? "rgba(255,255,255,0.05)" : "#4F46E5", border: "none", borderRadius: 8, padding: "6px 14px", color: current === TOTAL - 1 ? "rgba(255,255,255,0.25)" : "#fff", fontSize: 12, fontWeight: 600, cursor: current === TOTAL - 1 ? "default" : "pointer", transition: "all 0.2s", whiteSpace: "nowrap" }}
-          >{t.nav.next}</button>
+          <button onClick={() => goTo(current + 1)} disabled={current === TOTAL - 1} style={{ background: current === TOTAL - 1 ? "rgba(255,255,255,0.04)" : BRAND, border: "none", borderRadius: 8, padding: "6px 14px", color: current === TOTAL - 1 ? "rgba(255,255,255,0.2)" : "#fff", fontSize: 12, fontWeight: 600, cursor: current === TOTAL - 1 ? "default" : "pointer", whiteSpace: "nowrap" }}>{t.nav.next}</button>
         </div>
-
-        {/* Counter */}
-        <div style={{ textAlign: "center", marginTop: 6, color: "rgba(255,255,255,0.3)", fontSize: 10 }}>
-          {current + 1} / {TOTAL} · {t.nav.hint}
-        </div>
+        <div style={{ textAlign: "center", marginTop: 6, color: "rgba(255,255,255,0.18)", fontSize: 10 }}>{current + 1} / {TOTAL} · {t.nav.hint}</div>
       </div>
     </div>
   );
