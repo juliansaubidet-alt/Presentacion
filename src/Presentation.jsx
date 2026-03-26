@@ -50,7 +50,7 @@ const SlideTitle = ({ children, anim, delay = 0.1, size = 44 }) => (
 const i18n = {
   es: {
     nav: { prev: "← Anterior", next: "Siguiente →", hint: "← → navegar" },
-    labels: ["Intro", "Problema", "Gaps", "Módulo", "Solución", "Colaborador", "Ruta", "Habilidades", "Objetivos", "Aprendizaje", "Revisión", "Confirmación", "Manager", "Tools", "Cierre", "Gracias"],
+    labels: ["Intro", "Problema", "3 Flujos", "Mapa", "Tools", "Cierre", "Gracias"],
 
     intro: {
       tag: "🏆 Huckathon 2026 · Producto",
@@ -308,7 +308,7 @@ const i18n = {
 
   en: {
     nav: { prev: "← Previous", next: "Next →", hint: "← → navigate" },
-    labels: ["Intro", "Problem", "Gaps", "Module", "Solution", "Employee", "Path", "Skills", "Goals", "Learning", "Review", "Confirmed", "Manager", "Tools", "Closing", "Thanks"],
+    labels: ["Intro", "Problem", "3 Flows", "Map", "Tools", "Closing", "Thanks"],
 
     intro: {
       tag: "🏆 Hackathon 2026 · Product",
@@ -579,6 +579,124 @@ const pillStyle = (color) => color === "blue"
   ? { background: "rgba(111,147,235,0.15)", color: "#a5bcf5",  border: "1px solid rgba(111,147,235,0.2)" }
   : { background: "rgba(34,197,94,0.1)",    color: "#86efac",  border: "1px solid rgba(34,197,94,0.2)"  };
 
+/* ─── MAPA COMPONENT ─────────────────────────────────────────── */
+const mapaSteps = [
+  { num: "1", title: "Ruta profesional", sub: "Vertical o lateral", angle: -90, dist: 290, color: BRAND },
+  { num: "2", title: "Habilidades", sub: "Brechas hard y soft", angle: -36, dist: 300, color: BRAND },
+  { num: "3", title: "Objetivos", sub: "Corto · medio · largo", angle: 18, dist: 305, color: BRAND },
+  { num: "4", title: "Aprendizaje", sub: "Cursos priorizados", angle: 72, dist: 300, color: BRAND },
+  { num: "5", title: "Revisión y envío", sub: "Manager aprueba o comenta", angle: 126, dist: 290, color: "#22c55e" },
+];
+const mapaMgr = [
+  { title: "Vista del manager", sub: "Revisa · aprueba · sugiere", angle: 162, dist: 330 },
+  { title: "Seguimiento continuo", sub: "Nuevos objetivos y cursos", angle: 190, dist: 330 },
+  { title: "Plan activo", sub: "Progreso y objetivos", angle: -144, dist: 320 },
+];
+const toXY = (angle, dist) => ({
+  x: Math.cos((angle * Math.PI) / 180) * dist,
+  y: Math.sin((angle * Math.PI) / 180) * dist,
+});
+
+function MapaSlide({ anim }) {
+  const [hovered, setHovered] = useState(null);   // "s0"…"s4" | "m0"…"m2" | null
+  const [hoveredHub, setHoveredHub] = useState(false);
+
+  return (
+    <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 45%, #111830 0%, #0a0a14 65%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", overflow: "hidden" }}>
+      <style>{`
+        @keyframes dash-flow { to { stroke-dashoffset: -20; } }
+        @keyframes dash-flow-mgr { to { stroke-dashoffset: -16; } }
+        @keyframes wiggle-1 { 0%,100% { transform: translate(-50%,-50%) translateY(0px); } 50% { transform: translate(-50%,-50%) translateY(-5px); } }
+        @keyframes wiggle-2 { 0%,100% { transform: translate(-50%,-50%) translateX(0px); } 50% { transform: translate(-50%,-50%) translateX(4px); } }
+        @keyframes wiggle-3 { 0%,100% { transform: translate(-50%,-50%) translateY(0px) rotate(0deg); } 50% { transform: translate(-50%,-50%) translateY(-3px) rotate(1deg); } }
+        @keyframes wiggle-hub { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.03); } }
+      `}</style>
+      <GridBg />
+      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 1100, textAlign: "center" }}>
+        <div style={{ position: "relative", width: "100%", height: "100vh", maxHeight: 680 }}>
+          {/* SVG lines */}
+          <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", opacity: anim ? 1 : 0, transition: "opacity 1s ease 0.4s" }}>
+            {mapaSteps.map((s, i) => {
+              const hubR = 155;
+              const hw = 100, hh = 30;
+              const rad = (s.angle * Math.PI) / 180;
+              const ax = Math.abs(Math.cos(rad)), ay = Math.abs(Math.sin(rad));
+              const cardR = Math.min(ax > 0.01 ? hw / ax : 9999, ay > 0.01 ? hh / ay : 9999) + 5;
+              const ratio0 = hubR / s.dist;
+              const ratio1 = (s.dist - cardR) / s.dist;
+              const p = toXY(s.angle, s.dist);
+              const x1 = p.x * ratio0, y1 = p.y * ratio0;
+              const x2 = p.x * ratio1, y2 = p.y * ratio1;
+              const active = hovered === `s${i}` || hoveredHub;
+              return <line key={`s${i}`} x1={`calc(50% + ${x1}px)`} y1={`calc(46% + ${y1}px)`} x2={`calc(50% + ${x2}px)`} y2={`calc(46% + ${y2}px)`} stroke={i === 4 ? "#22c55e" : BRAND} strokeWidth={active ? 2.5 : 1.5} strokeDasharray={active ? "8 4" : "6 4"} strokeOpacity={active ? 0.9 : 0.3} style={{ transition: "all 0.35s ease", animation: active ? "dash-flow 0.6s linear infinite" : "none" }} />;
+            })}
+            {mapaMgr.map((m, i) => {
+              const hubR = 155;
+              const hw = 95, hh = 28;
+              const rad = (m.angle * Math.PI) / 180;
+              const ax = Math.abs(Math.cos(rad)), ay = Math.abs(Math.sin(rad));
+              const cardR = Math.min(ax > 0.01 ? hw / ax : 9999, ay > 0.01 ? hh / ay : 9999) + 5;
+              const ratio0 = hubR / m.dist;
+              const ratio1 = (m.dist - cardR) / m.dist;
+              const p = toXY(m.angle, m.dist);
+              const x1 = p.x * ratio0, y1 = p.y * ratio0;
+              const x2 = p.x * ratio1, y2 = p.y * ratio1;
+              const active = hovered === `m${i}` || hoveredHub;
+              return <line key={`m${i}`} x1={`calc(50% + ${x1}px)`} y1={`calc(46% + ${y1}px)`} x2={`calc(50% + ${x2}px)`} y2={`calc(46% + ${y2}px)`} stroke="#22c55e" strokeWidth={active ? 2 : 1.5} strokeDasharray="5 5" strokeOpacity={active ? 0.7 : 0.3} style={{ transition: "all 0.35s ease", animation: active ? "dash-flow-mgr 0.5s linear infinite" : "none" }} />;
+            })}
+          </svg>
+          {/* Center hub - Hugo */}
+          <div
+            onMouseEnter={() => setHoveredHub(true)}
+            onMouseLeave={() => setHoveredHub(false)}
+            style={{ position: "absolute", top: "46%", left: "50%", display: "flex", flexDirection: "column", alignItems: "center", zIndex: 5, opacity: anim ? (hoveredHub ? 1 : 0.85) : 0, animation: anim ? "wiggle-hub 3.5s ease-in-out infinite" : "none", transition: "opacity 0.35s ease", cursor: "pointer" }}>
+            <div style={{ position: "relative", width: 340, height: 340 }}>
+              <img src="/hugo.png" alt="Hugo" style={{ width: "100%", height: "100%", objectFit: "contain", filter: hoveredHub ? "drop-shadow(0 0 22px rgba(111,147,235,0.5))" : "drop-shadow(0 0 10px rgba(111,147,235,0.15))", transition: "filter 0.35s ease" }} />
+            </div>
+          </div>
+          {/* Collaborator steps */}
+          {mapaSteps.map((s, i) => {
+            const p = toXY(s.angle, s.dist);
+            const active = hovered === `s${i}`;
+            const wiggle = ["wiggle-1", "wiggle-2", "wiggle-3", "wiggle-1", "wiggle-2"][i];
+            const dur = [3.2, 3.8, 4.1, 3.5, 3.9][i];
+            return (
+              <div key={`step${i}`}
+                onMouseEnter={() => setHovered(`s${i}`)}
+                onMouseLeave={() => setHovered(null)}
+                style={{ position: "absolute", top: `calc(46% + ${p.y}px)`, left: `calc(50% + ${p.x}px)`, zIndex: 4, opacity: anim ? (active ? 1 : 0.6) : 0, animation: anim ? `${wiggle} ${dur}s ease-in-out infinite` : "none", transition: "opacity 0.35s ease", cursor: "pointer" }}>
+                <div style={{ position: "relative", background: active ? (i === 4 ? "rgba(34,197,94,0.2)" : "rgba(111,147,235,0.18)") : (i === 4 ? "rgba(34,197,94,0.1)" : "rgba(111,147,235,0.08)"), border: `1.5px solid ${i === 4 ? (active ? "rgba(34,197,94,0.6)" : "rgba(34,197,94,0.35)") : (active ? "rgba(111,147,235,0.55)" : "rgba(111,147,235,0.3)")}`, borderRadius: 16, padding: "16px 24px", minWidth: 170, textAlign: "center", backdropFilter: "blur(8px)", boxShadow: active ? `0 0 20px ${i === 4 ? "rgba(34,197,94,0.2)" : "rgba(111,147,235,0.2)"}` : "none", transform: active ? "scale(1.08)" : "scale(1)", transition: "all 0.35s ease" }}>
+                  <div style={{ position: "absolute", top: -13, left: -9, width: 28, height: 28, borderRadius: "50%", background: s.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: "#fff", boxShadow: active ? `0 0 12px ${s.color}66` : "none", transition: "box-shadow 0.35s ease" }}>{s.num}</div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff" }}>{s.title}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", marginTop: 4 }}>{s.sub}</div>
+                </div>
+              </div>
+            );
+          })}
+          {/* Manager actions */}
+          {mapaMgr.map((m, i) => {
+            const p = toXY(m.angle, m.dist);
+            const active = hovered === `m${i}`;
+            const wiggle = ["wiggle-3", "wiggle-1", "wiggle-2"][i];
+            const dur = [4.3, 3.7, 4.0][i];
+            return (
+              <div key={`mgr${i}`}
+                onMouseEnter={() => setHovered(`m${i}`)}
+                onMouseLeave={() => setHovered(null)}
+                style={{ position: "absolute", top: `calc(46% + ${p.y}px)`, left: `calc(50% + ${p.x}px)`, zIndex: 4, opacity: anim ? (active ? 1 : 0.85) : 0, animation: anim ? `${wiggle} ${dur}s ease-in-out infinite` : "none", transition: "opacity 0.35s ease", cursor: "pointer" }}>
+                <div style={{ background: active ? "rgba(34,197,94,0.15)" : "rgba(34,197,94,0.06)", border: `1.5px dashed ${active ? "rgba(34,197,94,0.5)" : "rgba(34,197,94,0.25)"}`, borderRadius: 14, padding: "14px 20px", minWidth: 160, textAlign: "center", boxShadow: active ? "0 0 16px rgba(34,197,94,0.1)" : "none", transform: active ? "scale(1.08)" : "scale(1)", transition: "all 0.35s ease" }}>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 700, color: active ? "#86efac" : "rgba(34,197,94,0.7)" }}>{m.title}</div>
+                  <div style={{ fontSize: 12, color: active ? "rgba(34,197,94,0.6)" : "rgba(34,197,94,0.4)", marginTop: 3 }}>{m.sub}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── SLIDE RENDERERS ────────────────────────────────────────── */
 const slides = [
 
@@ -640,577 +758,134 @@ const slides = [
     );
   }},
 
-  /* 2 ── GAPS */
-  { label: "Gaps", render: (anim, t) => {
-    const c = t.gaps;
-    return (
-      <div style={{ height: "100%", background: "linear-gradient(135deg, #0a0a14 0%, #0f1520 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim}>{c.title}</SlideTitle>
+  /* 2 ── 3 FLUJOS */
+  { label: "3 Flujos", render: (anim, t) => (
+    <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 40%, #1a2a5e 0%, #0a0a14 65%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px", position: "relative", overflow: "hidden" }}>
+      <GridBg />
+      <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(111,147,235,0.08) 0%, transparent 70%)", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
+      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 860 }}>
+        <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <Eyebrow anim={anim} delay={0}>Cobertura completa</Eyebrow>
+          <SlideTitle anim={anim} size={42} delay={0.1}>
+            Abarcamos los <GradText>3 flujos</GradText> del módulo.
+          </SlideTitle>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.5)", marginTop: 16, lineHeight: 1.6, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.25s" }}>
+            Career Path está diseñado pensando en todos los actores de la organización.
+          </p>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14, maxWidth: 760, width: "100%" }}>
-          {c.items.map((item, i) => (
-            <div key={i} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 16, padding: 22, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: `all 0.5s ease ${0.1 + i * 0.08}s` }}>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, color: BRAND, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 10 }}>{item.num}</div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, marginBottom: 7, lineHeight: 1.3, color: "#fff" }}>{item.title}</div>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", lineHeight: 1.6 }}>{item.body}</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
+          {[
+            {
+              icon: <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" fill="#6f93eb"/><path d="M4 21c0-4 4-7 8-7s8 3 8 7" fill="#6f93eb"/></svg>, name: "Colaborador", color: "#6f93eb", bg: "rgba(111,147,235,0.1)", border: "rgba(111,147,235,0.3)",
+              items: ["Crea y gestiona su propio plan", "Define su ruta y objetivos", "Identifica brechas de skills", "Accede a cursos priorizados", "Envía el plan al manager"],
+            },
+            {
+              icon: <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.5" fill="#22c55e"/><path d="M1 21c0-3.5 3.5-6 8-6s8 2.5 8 6" fill="#22c55e"/><circle cx="17" cy="7" r="3" fill="#22c55e" opacity="0.6"/><path d="M15 15c2 0 5 1.5 5 4.5" stroke="#22c55e" strokeWidth="1.5" opacity="0.6"/></svg>, name: "Manager", color: "#22c55e", bg: "rgba(34,197,94,0.1)", border: "rgba(34,197,94,0.3)",
+              items: ["Ve el plan de todo su equipo", "Aprueba o sugiere cambios", "Detecta brechas en el equipo", "Recibe alertas de planes", "Acompaña el desarrollo real"],
+            },
+            {
+              icon: <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><defs><mask id="gm"><rect width="32" height="32" fill="white"/><circle cx="16" cy="15" r="4.5" fill="black"/></mask></defs><path d="M14.5 2h3l.5 3.2a9.5 9.5 0 012.6 1.5l3-1.4 2.1 2.1-1.4 3a9.5 9.5 0 011.5 2.6l3.2.5v3l-3.2.5a9.5 9.5 0 01-1.5 2.6l1.4 3-2.1 2.1-3-1.4a9.5 9.5 0 01-2.6 1.5L17.5 28h-3l-.5-3.2a9.5 9.5 0 01-2.6-1.5l-3 1.4-2.1-2.1 1.4-3a9.5 9.5 0 01-1.5-2.6L3 16.5v-3l3.2-.5a9.5 9.5 0 011.5-2.6l-1.4-3 2.1-2.1 3 1.4a9.5 9.5 0 012.6-1.5z" fill="#9ca3af" mask="url(#gm)"/></svg>, name: "Admin", color: "#9ca3af", bg: "rgba(156,163,175,0.08)", border: "rgba(156,163,175,0.25)",
+              items: ["Configura rutas y roles", "Gestiona habilidades globales", "Accede a reportes y métricas", "Administra permisos por equipo"],
+            },
+          ].map((flow, i) => (
+            <div key={i} style={{ background: flow.bg, border: `1px solid ${flow.border}`, borderRadius: 20, padding: 28, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(28px)", transition: `all 0.6s ease ${0.3 + i * 0.12}s` }}>
+              <div style={{ fontSize: 30, marginBottom: 14, lineHeight: 1, color: "#fff" }}>{flow.icon}</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 800, color: flow.color, marginBottom: 16 }}>{flow.name}</div>
+              <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
+                {flow.items.map((item, j) => (
+                  <li key={j} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 13, color: "rgba(255,255,255,0.65)", lineHeight: 1.4 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: flow.color, marginTop: 5, flexShrink: 0 }} />{item}
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>
       </div>
-    );
-  }},
+    </div>
+  )},
 
-  /* 3 ── MÓDULO */
-  { label: "Módulo", render: (anim, t) => {
-    const c = t.module;
-    return (
-      <div style={{ height: "100%", background: "linear-gradient(135deg, #0a0a14 0%, #0f1520 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px" }}>
-        <div style={{ width: "100%", maxWidth: 820 }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={36}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.45)", lineHeight: 1.65, marginTop: 12, marginBottom: 32, maxWidth: 780, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(16px)", transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {c.steps.map((step, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "16px 20px", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(-24px)", transition: `all 0.5s ease ${0.25 + i * 0.07}s` }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(111,147,235,0.2)", border: "1px solid rgba(111,147,235,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 800, color: BRAND, flexShrink: 0 }}>{step.num}</div>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{step.icon}</div>
-                <div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", marginBottom: 3 }}>{step.title}</div>
-                  <div style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.4 }}>{step.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }},
+  /* 3 ── MAPA PLAN DE CARRERA */
+  { label: "Mapa", render: (anim) => <MapaSlide anim={anim} /> },
 
-  /* 4 ── SOLUCIÓN */
-  { label: "Solución", render: (anim, t) => {
-    const c = t.solution;
+  /* 4 ── TOOLS TIMELINE */
+  { label: "Tools", render: (anim) => {
+    const allSteps = [
+      { num: "01", title: "Benchmark", desc: "Análisis de mercado con IA", logos: ["/claude-logo.jpg"], stage: "Discovery", color: "#f59e0b" },
+      { num: "02", title: "UI en Figma Make", desc: "Flujo con prompt + librería Hugo", logos: ["/figma-logo.png"], stage: "Frontend", color: BRAND },
+      { num: "03", title: "Vibecoding", desc: "Ajuste en terminal con design system", logos: ["/claude-logo.jpg", "/vscode-logo.png"], stage: "Frontend", color: BRAND },
+      { num: "04", title: "Deploy front", desc: "Código a GitHub + Vercel", logos: ["/github-logo.png", "/vercel-logo.png"], stage: "Frontend", color: BRAND },
+      { num: "05", title: "Deploy back", desc: "Código a GitHub + Render", logos: ["/github-logo.png"], stage: "Backend", color: "#22c55e" },
+      { num: "06", title: "Integración", desc: "Backend + frontend desplegados", logos: ["/vercel-logo.png"], stage: "Integración", color: "#a78bfa" },
+      { num: "07", title: "Presentación", desc: "Armada en Claude", logos: ["/claude-logo.jpg"], stage: "Integración", color: "#a78bfa" },
+    ];
     return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 70% 30%, #1a3060 0%, #0a0a14 60%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px" }}>
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={38}>{c.title}</SlideTitle>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, maxWidth: 900, width: "100%", alignItems: "start" }}>
-          {/* Collaborator */}
-          <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: 24, opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(-30px)", transition: "all 0.6s ease 0.2s" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", borderRadius: 999, background: "rgba(111,147,235,0.15)", color: "#a5bcf5", fontSize: 12, fontWeight: 600, marginBottom: 14 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: BRAND }} />{c.collab.role}
-            </div>
-            <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 14, lineHeight: 1.2, color: "#fff" }}>{c.collab.title}</h3>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
-              {c.collab.features.map((f, i) => (
-                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND, marginTop: 5, flexShrink: 0 }} />{f}
-                </li>
-              ))}
-            </ul>
-            {/* Path map */}
-            <div style={{ display: "flex", alignItems: "center", marginTop: 18, gap: 0 }}>
-              {c.collab.levels.map((node, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center" }}>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                    <div style={{ width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, fontFamily: "'Inter', sans-serif", ...nodeStyle[node.type] }}>{node.text}</div>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)", textAlign: "center", whiteSpace: "pre-line", lineHeight: 1.3 }}>{node.label}</div>
-                  </div>
-                  {i < c.collab.levels.length - 1 && <div style={{ width: 20, height: 2, flexShrink: 0, background: i === 0 ? lineColor.done : i === 1 ? lineColor.current : lineColor.normal }} />}
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Manager */}
-          <div style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, padding: 24, opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.4s" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "5px 14px", borderRadius: 999, background: "rgba(34,197,94,0.1)", color: "#86efac", fontSize: 12, fontWeight: 600, marginBottom: 14 }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e" }} />{c.manager.role}
-            </div>
-            <h3 style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 700, marginBottom: 14, lineHeight: 1.2, color: "#fff" }}>{c.manager.title}</h3>
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9 }}>
-              {c.manager.features.map((f, i) => (
-                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 9, fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: BRAND, marginTop: 5, flexShrink: 0 }} />{f}
-                </li>
-              ))}
-            </ul>
-            <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 7 }}>
-              {c.manager.team.map((m, i) => (
-                <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 13px", background: m.rb, border: `1px solid ${m.rb2}`, borderRadius: 8 }}>
-                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.8)" }}>{m.name}</span>
-                  <span style={{ fontSize: 11, color: m.sc, fontWeight: 600, background: m.sb, padding: "2px 10px", borderRadius: 999 }}>{m.status}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 5 ── COLABORADOR VIEW */
-  { label: "Colaborador", render: (anim, t) => {
-    const c = t.collabView;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 30% 60%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        {/* Left: text */}
-        <div style={{ flex: "0 0 280px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={30}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(16px)", transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        {/* Right: mock UI */}
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>Plan de Carrera</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-              {["Colaborador", "Manager", "HU Admin"].map((tab, i) => (
-                <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 999, background: i === 0 ? BRAND : "transparent", color: i === 0 ? "#fff" : "rgba(255,255,255,0.35)", fontWeight: 600 }}>{tab}</span>
-              ))}
-            </div>
-          </div>
-          <div style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
-            {/* Top row: role card + unlock list */}
-            <div style={{ display: "flex", gap: 12 }}>
-              {/* Role card */}
-              <div style={{ flex: 1, background: "linear-gradient(135deg, #3b5bdb, #6f93eb)", borderRadius: 14, padding: "16px 18px" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.6)", letterSpacing: "1px", marginBottom: 6 }}>{c.roleLabel}</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{c.roleName}</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,0.65)", marginBottom: 12 }}>{c.roleTeam}</div>
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#fff", background: "rgba(255,255,255,0.2)", padding: "4px 10px", borderRadius: 999 }}>{c.tenure}</span>
-              </div>
-              {/* Unlock list */}
-              <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "14px 16px" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "1px", marginBottom: 10 }}>{c.unlockLabel}</div>
-                {c.unlockItems.map((item, i) => (
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 11, color: "rgba(255,255,255,0.65)", marginBottom: 7 }}>
-                    <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 10 }}>·</span>{item}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Empty state */}
-            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "16px 18px", textAlign: "center" }}>
-              <div style={{ fontSize: 22, marginBottom: 8 }}>⚙️</div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff", marginBottom: 5 }}>{c.emptyTitle}</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginBottom: 10 }}>{c.emptyDesc}</div>
-              <span style={{ fontSize: 10, color: BRAND, background: "rgba(111,147,235,0.15)", border: "1px solid rgba(111,147,235,0.2)", padding: "3px 12px", borderRadius: 999 }}>● {c.rolePill}</span>
-            </div>
-            {/* CTA */}
-            <div style={{ background: BRAND, borderRadius: 12, padding: "13px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 800, color: "#fff" }}>{c.ctaBtn}</div>
-            </div>
-            <div style={{ textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: -4 }}>{c.ctaSub}</div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 6 ── RUTA PROFESIONAL */
-  { label: "Ruta", render: (anim, t) => {
-    const c = t.rutaView;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 30% 40%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        {/* Left */}
-        <div style={{ flex: "0 0 280px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={30}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(16px)", transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        {/* Right: mock UI */}
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>{c.headerTitle}</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-              {["Colaborador", "Manager", "HU Admin"].map((tab, i) => (
-                <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 999, background: i === 0 ? BRAND : "transparent", color: i === 0 ? "#fff" : "rgba(255,255,255,0.35)", fontWeight: 600 }}>{tab}</span>
-              ))}
-            </div>
-          </div>
-          <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 11 }}>
-            {/* Progress */}
-            <div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>{c.stepLabel}</div>
-              <div style={{ display: "flex", gap: 3 }}>
-                {[0,1,2,3,4].map(i => (
-                  <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i === 0 ? BRAND : "rgba(255,255,255,0.1)" }} />
-                ))}
-              </div>
-            </div>
-            {/* Growth type */}
-            <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "1px", marginBottom: 8 }}>{c.growthLabel}</div>
-              <div style={{ display: "flex", gap: 10 }}>
-                {[c.vertical, c.lateral].map((opt, i) => (
-                  <div key={i} style={{ flex: 1, borderRadius: 10, border: `1.5px solid ${i === 0 ? BRAND : "rgba(255,255,255,0.1)"}`, background: i === 0 ? "rgba(111,147,235,0.12)" : "rgba(255,255,255,0.03)", padding: "10px 12px" }}>
-                    <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 700, color: i === 0 ? "#a5bcf5" : "rgba(255,255,255,0.5)", marginBottom: 3 }}>{opt.icon} {opt.title}</div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{opt.desc}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Fields */}
-            {c.fields.map((f, i) => (
-              <div key={i}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "1px", marginBottom: 5 }}>{f.label}</div>
-                <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 12px", fontSize: 11, color: "rgba(255,255,255,0.25)" }}>{f.placeholder}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 8 ── HABILIDADES */
-  { label: "Habilidades", render: (anim, t) => {
-    const c = t.habilidadesView;
-    const SkillPill = ({ s, blue }) => (
-      <span style={{ padding: "5px 12px", borderRadius: 999, fontSize: 11, fontWeight: 600, background: s.checked ? (blue ? "rgba(111,147,235,0.2)" : "rgba(34,197,94,0.15)") : "rgba(255,255,255,0.06)", color: s.checked ? (blue ? "#a5bcf5" : "#86efac") : "rgba(255,255,255,0.4)", border: `1px solid ${s.checked ? (blue ? "rgba(111,147,235,0.3)" : "rgba(34,197,94,0.25)") : "rgba(255,255,255,0.1)"}` }}>
-        {s.checked ? "✓ " : ""}{s.name}
-      </span>
-    );
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 30% 60%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        <div style={{ flex: "0 0 270px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={30}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>Crear plan de carrera</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>{["Colaborador","Manager","HU Admin"].map((tab,i)=><span key={i} style={{ fontSize:10, padding:"3px 10px", borderRadius:999, background:i===0?BRAND:"transparent", color:i===0?"#fff":"rgba(255,255,255,0.35)", fontWeight:600 }}>{tab}</span>)}</div>
-          </div>
-          <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>{c.stepLabel}</div>
-              <div style={{ display: "flex", gap: 3, marginBottom: 12 }}>{[0,1,2,3,4].map(i=><div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<=1?BRAND:"rgba(255,255,255,0.1)" }} />)}</div>
-            </div>
-            <div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "1px" }}>{c.hardLabel}</span>
-                <span style={{ fontSize: 9, fontWeight: 600, color: "#a78bfa", background: "rgba(167,139,250,0.15)", padding: "2px 8px", borderRadius: 999 }}>{c.roleTag}</span>
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{c.hardSkills.map((s,i)=><SkillPill key={i} s={s} blue />)}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "1px", marginBottom: 8 }}>{c.softLabel}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>{c.softSkills.map((s,i)=><SkillPill key={i} s={s} blue={false} />)}</div>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              {[[c.gapHardLabel, c.gapHard, "#a5bcf5", "rgba(111,147,235,0.1)"], [c.gapSoftLabel, c.gapSoft, "#86efac", "rgba(34,197,94,0.08)"]].map(([label, items, color, bg], ci) => (
-                <div key={ci} style={{ flex: 1, background: bg, border: `1px solid ${color}22`, borderRadius: 10, padding: "10px 12px" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color, marginBottom: 6 }}>{label}</div>
-                  {items.map((item,i)=><div key={i} style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", marginBottom: 3 }}>{item}</div>)}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 9 ── OBJETIVOS */
-  { label: "Objetivos", render: (anim, t) => {
-    const c = t.objetivosView;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 70% 40%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        <div style={{ flex: "0 0 270px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={30}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>Crear plan de carrera</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>{["Colaborador","Manager","HU Admin"].map((tab,i)=><span key={i} style={{ fontSize:10, padding:"3px 10px", borderRadius:999, background:i===0?BRAND:"transparent", color:i===0?"#fff":"rgba(255,255,255,0.35)", fontWeight:600 }}>{tab}</span>)}</div>
-          </div>
-          <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-            <div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>{c.stepLabel}</div>
-              <div style={{ display: "flex", gap: 3, marginBottom: 10 }}>{[0,1,2,3,4].map(i=><div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<=2?BRAND:"rgba(255,255,255,0.1)" }} />)}</div>
-            </div>
-            <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "1px" }}>{c.devLabel}</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: -6 }}>{c.devSub}</div>
-            {c.goals.map((g, i) => (
-              <div key={i}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "1px", marginBottom: 5 }}>{g.horizonLabel}</div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "8px 12px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, color: g.tagColor, background: g.tagBg, padding: "2px 8px", borderRadius: 999 }}>{g.tag}</span>
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{g.text}</span>
-                  </div>
-                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)" }}>Editar ×</span>
-                </div>
-              </div>
-            ))}
-            <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "10px 12px" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "1px", marginBottom: 7 }}>{c.addLabel}</div>
-              <div style={{ display: "flex", gap: 8 }}>
-                <div style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 6, padding: "6px 10px", fontSize: 10, color: "rgba(255,255,255,0.4)" }}>Corto plazo ▾</div>
-                <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 6, padding: "6px 10px", fontSize: 10, color: "rgba(255,255,255,0.25)" }}>{c.addPlaceholder}</div>
-                <div style={{ background: BRAND, borderRadius: 6, padding: "6px 12px", fontSize: 11, fontWeight: 700, color: "#fff" }}>{c.addBtn}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 10 ── APRENDIZAJE */
-  { label: "Aprendizaje", render: (anim, t) => {
-    const c = t.aprendizajeView;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 30% 40%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        <div style={{ flex: "0 0 270px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={28}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>Crear plan de carrera</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>{["Colaborador","Manager","HU Admin"].map((tab,i)=><span key={i} style={{ fontSize:10, padding:"3px 10px", borderRadius:999, background:i===0?BRAND:"transparent", color:i===0?"#fff":"rgba(255,255,255,0.35)", fontWeight:600 }}>{tab}</span>)}</div>
-          </div>
-          <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-            <div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>{c.stepLabel}</div>
-              <div style={{ display: "flex", gap: 3, marginBottom: 8 }}>{[0,1,2,3,4].map(i=><div key={i} style={{ flex:1, height:3, borderRadius:2, background:i<=3?BRAND:"rgba(255,255,255,0.1)" }} />)}</div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>{c.listTitle}</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", marginTop: 2 }}>{c.listSub}</div>
-              </div>
-              <div style={{ display: "flex", gap: 5 }}>{c.filters.map((f,i)=><span key={i} style={{ fontSize:10, padding:"3px 10px", borderRadius:999, background:i===0?"rgba(34,197,94,0.15)":i===1?"rgba(111,147,235,0.15)":"rgba(255,255,255,0.06)", color:i===0?"#86efac":i===1?"#a5bcf5":"rgba(255,255,255,0.4)", fontWeight:600 }}>{f}</span>)}</div>
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-              {c.courses.map((course, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderBottom: i < c.courses.length-1 ? "1px solid rgba(255,255,255,0.06)" : "none" }}>
-                  <span style={{ fontSize: 16 }}>{course.icon}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 9, fontWeight: 600, color: "rgba(255,255,255,0.3)", letterSpacing: "0.5px" }}>{course.type}</div>
-                    <div style={{ fontSize: 12, fontWeight: 600, color: "#fff" }}>{course.name}</div>
-                    <div style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>{course.source}</div>
-                  </div>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: course.tc, background: course.tb, padding: "2px 8px", borderRadius: 999, flexShrink: 0 }}>{course.tag}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 11 ── REVISIÓN */
-  { label: "Revisión", render: (anim, t) => {
-    const c = t.revisionView;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 70% 60%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        <div style={{ flex: "0 0 270px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={28}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>Crear plan de carrera</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>{["Colaborador","Manager","HU Admin"].map((tab,i)=><span key={i} style={{ fontSize:10, padding:"3px 10px", borderRadius:999, background:i===0?BRAND:"transparent", color:i===0?"#fff":"rgba(255,255,255,0.35)", fontWeight:600 }}>{tab}</span>)}</div>
-          </div>
-          <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-            <div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 6 }}>{c.stepLabel}</div>
-              <div style={{ display: "flex", gap: 3, marginBottom: 8 }}>{[0,1,2,3,4].map(i=><div key={i} style={{ flex:1, height:3, borderRadius:2, background:BRAND }} />)}</div>
-            </div>
-            <div style={{ background: "rgba(111,147,235,0.1)", border: "1px solid rgba(111,147,235,0.2)", borderRadius: 10, padding: "10px 14px" }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#a5bcf5" }}>🎉 {c.alertText}</div>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 3 }}>{c.alertSub}</div>
-            </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "12px" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "1px", marginBottom: 6 }}>{c.routeLabel}</div>
-                <span style={{ fontSize: 9, fontWeight: 600, color: BRAND, background: "rgba(111,147,235,0.15)", padding: "2px 8px", borderRadius: 999 }}>{c.routeTag}</span>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 800, color: "#fff", marginTop: 6 }}>{c.routeRole}</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 4 }}>{c.routeDur}</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{c.routeMgr}</div>
-              </div>
-              <div style={{ flex: 1, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "12px" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "1px", marginBottom: 8 }}>{c.goalsLabel}</div>
-                {c.goals.map((g,i)=>(
-                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-                    <span style={{ fontSize: 9, fontWeight: 700, color: g.color, background: `${g.color}22`, padding: "1px 6px", borderRadius: 999 }}>{g.tag}</span>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.65)" }}>{g.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, padding: "12px" }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.35)", letterSpacing: "1px", marginBottom: 8 }}>{c.skillsLabel}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", marginBottom: 5 }}>{c.hardLabel}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>{c.hardSkills.map((s,i)=><span key={i} style={{ fontSize:10, padding:"2px 9px", borderRadius:999, background:"rgba(255,255,255,0.07)", border:"1px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.6)" }}>{s}</span>)}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", marginBottom: 5 }}>{c.softLabel}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{c.softSkills.map((s,i)=><span key={i} style={{ fontSize:10, padding:"2px 9px", borderRadius:999, background:"rgba(255,255,255,0.07)", border:"1px solid rgba(255,255,255,0.1)", color:"rgba(255,255,255,0.6)" }}>{s}</span>)}</div>
-            </div>
-            <div style={{ background: BRAND, borderRadius: 10, padding: "12px", textAlign: "center" }}>
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 800, color: "#fff" }}>{c.sendBtn}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 12 ── CONFIRMACIÓN */
-  { label: "Confirmación", render: (anim, t) => {
-    const c = t.confirmView;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 50%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        <div style={{ flex: "0 0 270px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={30}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>Plan de Carrera</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>{["Colaborador","Manager","HU Admin"].map((tab,i)=><span key={i} style={{ fontSize:10, padding:"3px 10px", borderRadius:999, background:i===0?BRAND:"transparent", color:i===0?"#fff":"rgba(255,255,255,0.35)", fontWeight:600 }}>{tab}</span>)}</div>
-          </div>
-          <div style={{ padding: "40px 24px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 14 }}>
-            <div style={{ width: 56, height: 56, borderRadius: "50%", border: "2px solid #22c55e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#22c55e", background: "rgba(34,197,94,0.1)" }}>{c.successIcon}</div>
-            <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 16, fontWeight: 800, color: "#fff" }}>{c.successTitle}</div>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", lineHeight: 1.6, whiteSpace: "pre-line", maxWidth: 360 }}>{c.successDesc}</p>
-            <div style={{ width: "100%", background: BRAND, borderRadius: 10, padding: "12px", marginTop: 8 }}>
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 800, color: "#fff" }}>{c.ctaBtn}</span>
-            </div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)" }}>{c.ctaSub}</div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 13 ── MANAGER VIEW */
-  { label: "Manager", render: (anim, t) => {
-    const c = t.managerView;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 70% 30%, #1a3060 0%, #0a0a14 60%)", display: "flex", alignItems: "center", padding: "40px 60px", gap: 48 }}>
-        {/* Left: text */}
-        <div style={{ flex: "0 0 300px" }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={32}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.7, marginTop: 14, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(16px)", transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-        </div>
-        {/* Right: mock UI */}
-        <div style={{ flex: 1, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 20, overflow: "hidden", opacity: anim ? 1 : 0, transform: anim ? "translateX(0)" : "translateX(30px)", transition: "all 0.6s ease 0.3s" }}>
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 18px", borderBottom: "1px solid rgba(255,255,255,0.08)", background: "rgba(111,147,235,0.08)" }}>
-            <div style={{ width: 26, height: 26, borderRadius: 7, background: BRAND, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, color: "#fff" }}>H</div>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 700, color: "#fff" }}>Plan de Carrera</span>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-              {["Colaborador", "Manager", "HU Admin"].map((tab, i) => (
-                <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 999, background: i === 1 ? BRAND : "transparent", color: i === 1 ? "#fff" : "rgba(255,255,255,0.35)", fontWeight: 600 }}>{tab}</span>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: "flex", minHeight: 0 }}>
-            {/* Team list */}
-            <div style={{ width: 220, borderRight: "1px solid rgba(255,255,255,0.07)", padding: "12px 0" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", padding: "0 14px 10px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.5)" }}>
-                <span>{c.teamLabel}</span><span>{c.reportsLabel}</span>
-              </div>
-              {c.team.map((m, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 9, padding: "8px 14px", background: i === 0 ? "rgba(111,147,235,0.1)" : "transparent", borderLeft: i === 0 ? `2px solid ${BRAND}` : "2px solid transparent" }}>
-                  <div style={{ width: 28, height: 28, borderRadius: "50%", background: m.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 800, color: m.color, flexShrink: 0 }}>{m.initials}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.name}</div>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>{m.role}</div>
-                  </div>
-                  <span style={{ fontSize: 9, fontWeight: 600, color: m.sc, background: m.sb, padding: "2px 7px", borderRadius: 999, flexShrink: 0 }}>{m.status}</span>
-                </div>
-              ))}
-            </div>
-            {/* Detail panel */}
-            <div style={{ flex: 1, padding: "12px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-              {/* Alert */}
-              <div style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 10, padding: "10px 14px" }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#fcd34d" }}>⚠ {c.alertLabel}</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{c.alertSub}</div>
-                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                  <button style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "1px solid #22c55e", background: "transparent", color: "#86efac", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>{c.approveBtn}</button>
-                  <button style={{ flex: 1, padding: "6px 0", borderRadius: 8, border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{c.changesBtn}</button>
-                </div>
-              </div>
-              {/* Career map */}
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "#fff", marginBottom: 2 }}>{c.mapTitle}</div>
-                <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginBottom: 10 }}>{c.mapSub}</div>
-                <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-                  {c.nodes.map((node, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center" }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-                        {node.tag ? <span style={{ fontSize: 8, color: BRAND, fontWeight: 700 }}>{node.tag}</span> : <span style={{ fontSize: 8, opacity: 0 }}>·</span>}
-                        <div style={{ width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800, fontFamily: "'Inter', sans-serif", ...nodeStyle[node.type] }}>
-                          {node.type === "done" ? "✓" : node.type === "current" ? "L2" : node.type === "goal" ? "L3" : "🔒"}
-                        </div>
-                        <div style={{ fontSize: 8, color: "rgba(255,255,255,0.4)", textAlign: "center", whiteSpace: "pre-line", lineHeight: 1.3 }}>{node.label}</div>
-                      </div>
-                      {i < c.nodes.length - 1 && <div style={{ width: 18, height: 2, background: i === 0 ? "#22c55e" : i === 1 ? BRAND : "rgba(255,255,255,0.1)", flexShrink: 0, marginBottom: 14 }} />}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Suggest changes */}
-              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 10, padding: "10px 12px" }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.3)", letterSpacing: "1px", marginBottom: 6 }}>{c.suggestLabel}</div>
-                <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 6, padding: "7px 10px", fontSize: 10, color: "rgba(255,255,255,0.25)", marginBottom: 8 }}>{c.placeholder}</div>
-                <div style={{ display: "inline-block", background: BRAND, borderRadius: 7, padding: "6px 14px", fontSize: 10, fontWeight: 700, color: "#fff", cursor: "pointer" }}>{c.sendBtn}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }},
-
-  /* 5 ── TOOLS */
-  { label: "Tools", render: (anim, t) => {
-    const c = t.tools;
-    return (
-      <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 40%, #1a2a5e 0%, #0a0a14 65%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px" }}>
+      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", justifyContent: "center", padding: "30px 40px", position: "relative", overflow: "hidden" }}>
         <GridBg />
-        <div style={{ position: "relative", zIndex: 2, textAlign: "center", width: "100%", maxWidth: 820 }}>
-          <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
-          <SlideTitle anim={anim} size={40}>{c.title}</SlideTitle>
-          <p style={{ fontSize: 15, color: "rgba(255,255,255,0.45)", marginTop: 10, marginBottom: 40, opacity: anim ? 1 : 0, transition: "all 0.5s ease 0.2s" }}>{c.subtitle}</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 14, justifyContent: "center" }}>
-            {c.items.map((tool, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, background: tool.bg, border: `1px solid ${tool.color}22`, borderRadius: 16, padding: "16px 22px", minWidth: 180, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: `all 0.5s ease ${0.15 + i * 0.07}s` }}>
-                <div style={{ width: 44, height: 44, borderRadius: tool.img ? "50%" : 12, background: `${tool.color}18`, border: `1px solid ${tool.color}33`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0, overflow: "hidden" }}>
-                  {tool.img ? <img src={tool.img} alt={tool.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : tool.icon}
+        <div style={{ position: "relative", zIndex: 2, width: "100%" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <Eyebrow anim={anim}>Nuestro proceso</Eyebrow>
+            <SlideTitle anim={anim} size={36}>Cómo lo <GradText>construimos</GradText></SlideTitle>
+          </div>
+          {/* Timeline container */}
+          <div style={{ position: "relative", display: "flex", width: "100%" }}>
+            {/* Horizontal line */}
+            <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: 3, background: "rgba(255,255,255,0.12)", transform: "translateY(-50%)", zIndex: 1, opacity: anim ? 1 : 0, transition: "opacity 0.6s ease 0.2s" }} />
+            {/* Steps */}
+            {allSteps.map((step, i) => {
+              const above = i % 2 === 0;
+              const prevColor = i > 0 ? allSteps[i-1].color : null;
+              const isNewStage = i === 0 || step.stage !== allSteps[i-1].stage;
+              return (
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", position: "relative", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : `translateY(${above ? "20px" : "-20px"})`, transition: `all 0.5s ease ${0.25 + i * 0.1}s` }}>
+                  {/* Top content (above items) */}
+                  <div style={{ height: 210, display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", paddingBottom: 18, width: "100%" }}>
+                    {above && <>
+                      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+                        {step.logos.map((logo, li) => (
+                          <div key={li} style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", border: `2px solid ${step.color}44`, background: "rgba(255,255,255,0.05)" }}>
+                            <img src={logo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.3, marginBottom: 6 }}>{step.title}</div>
+                      <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textAlign: "center", lineHeight: 1.5, maxWidth: 140 }}>{step.desc}</div>
+                    </>}
+                  </div>
+                  {/* Vertical bar + circle on timeline */}
+                  <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    {/* Vertical colored bar */}
+                    <div style={{ width: 4, height: above ? 36 : 0, background: step.color, borderRadius: 2 }} />
+                    {/* Circle on line */}
+                    <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${step.color}22`, border: `3px solid ${step.color}`, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3 }}>
+                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 800, color: step.color }}>{step.num}</span>
+                    </div>
+                    {/* Vertical colored bar down */}
+                    <div style={{ width: 4, height: above ? 0 : 36, background: step.color, borderRadius: 2 }} />
+                    {/* Stage label at transition */}
+                    {isNewStage && (
+                      <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap", ...(above ? { bottom: -30 } : { top: -30 }) }}>
+                        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 800, color: step.color, textTransform: "uppercase", letterSpacing: "1.5px", background: BG, padding: "2px 8px", borderRadius: 4, border: `1px solid ${step.color}33` }}>{step.stage}</span>
+                      </div>
+                    )}
+                  </div>
+                  {/* Bottom content (below items) */}
+                  <div style={{ height: 210, display: "flex", flexDirection: "column", justifyContent: "flex-start", alignItems: "center", paddingTop: 18, width: "100%" }}>
+                    {!above && <>
+                      <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.3, marginBottom: 6 }}>{step.title}</div>
+                      <div style={{ fontSize: 13, color: "rgba(255,255,255,0.4)", textAlign: "center", lineHeight: 1.5, maxWidth: 140, marginBottom: 12 }}>{step.desc}</div>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        {step.logos.map((logo, li) => (
+                          <div key={li} style={{ width: 34, height: 34, borderRadius: "50%", overflow: "hidden", border: `2px solid ${step.color}44`, background: "rgba(255,255,255,0.05)" }}>
+                            <img src={logo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          </div>
+                        ))}
+                      </div>
+                    </>}
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, fontWeight: 700, color: tool.color }}>{tool.name}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{tool.desc}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
