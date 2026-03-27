@@ -745,6 +745,16 @@ const slides = [
               </div>
             ))}
           </div>
+          <div style={{ marginTop: 32, display: "flex", gap: 24, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.55s" }}>
+            {[{ photo: "/angelo.jpg", name: "Angelo", color: "#6f93eb" }, { photo: "/sofia.png", name: "Sofia", color: "#22c55e" }, { photo: "/olivia.jpg", name: "Olivia", color: "#a78bfa" }, { photo: "/julian.jpg", name: "Julian", color: "#f59e0b" }].map((p, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 56, height: 56, borderRadius: "50%", overflow: "hidden", border: `2px solid ${p.color}` }}>
+                  <img src={p.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", fontWeight: 500 }}>{p.name}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
