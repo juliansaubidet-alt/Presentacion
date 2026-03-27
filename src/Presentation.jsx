@@ -756,6 +756,7 @@ const slides = [
             ))}
           </div>
         </div>
+        <img src="/hugo-intro.png" alt="Hugo" style={{ position: "absolute", right: 40, top: "50%", transform: "translateY(-50%)", height: "70%", maxHeight: 480, width: "auto", opacity: anim ? 1 : 0, transition: "all 0.8s ease 0.5s", filter: "drop-shadow(0 8px 30px rgba(111,147,235,0.25))", zIndex: 2 }} />
       </div>
     );
   }},
