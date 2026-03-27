@@ -50,7 +50,7 @@ const SlideTitle = ({ children, anim, delay = 0.1, size = 44 }) => (
 const i18n = {
   es: {
     nav: { prev: "← Anterior", next: "Siguiente →", hint: "← → navegar" },
-    labels: ["Intro", "Problema", "3 Flujos", "Mapa", "Tools", "Cierre", "Gracias"],
+    labels: ["Intro", "Problema", "Solución", "Mapa", "Flujos", "Tools", "Cierre", "Gracias"],
 
     intro: {
       tag: "🏆 Huckathon 2026 · Producto",
@@ -64,6 +64,18 @@ const i18n = {
       left:  { icon: "📚", name: "Aprendizaje de Contenidos", desc: "Plataformas que proveen cursos, certificaciones y material de estudio. Foco en consumo de conocimiento.", pills: ["Coursera", "Degreed", "LinkedIn Learning"], color: "blue" },
       gap:   "❌ GAP\nno cubierto",
       right: { icon: "🤝", name: "Coaching Humano", desc: "Herramientas de coaching 1:1, sesiones con mentores y desarrollo liderado por personas.", pills: ["BetterUp", "Pathrise", "Lattice"], color: "green" },
+    },
+
+    solucion: {
+      eyebrow: "Nuestra Visión",
+      title: "Más que herramientas: motivación, talento y futuro.",
+      subtitle: "No solo buscamos ofrecer una solución tecnológica. Queremos que las personas aumenten su motivación, desarrollen su talento y elijan quedarse en las empresas con un plan de carrera claro hacia el éxito.",
+      pillars: [
+        { icon: "🔥", title: "Motivación", desc: "Cuando las personas ven un camino claro de crecimiento, su compromiso se transforma en acción.", color: "#f59e0b" },
+        { icon: "💎", title: "Talento", desc: "Desarrollamos las habilidades que la empresa necesita y el colaborador desea, creando valor para ambos.", color: "#6f93eb" },
+        { icon: "🚀", title: "Retención", desc: "Un buen plan de carrera reduce la rotación porque las personas eligen quedarse donde pueden crecer.", color: "#22c55e" },
+        { icon: "🏆", title: "Éxito", desc: "El éxito no es solo llegar al siguiente nivel — es construir un camino profesional con propósito.", color: "#a78bfa" },
+      ],
     },
 
     gaps: {
@@ -308,7 +320,7 @@ const i18n = {
 
   en: {
     nav: { prev: "← Previous", next: "Next →", hint: "← → navigate" },
-    labels: ["Intro", "Problem", "3 Flows", "Map", "Tools", "Closing", "Thanks"],
+    labels: ["Intro", "Problem", "Solution", "Map", "Flows", "Tools", "Closing", "Thanks"],
 
     intro: {
       tag: "🏆 Hackathon 2026 · Product",
@@ -322,6 +334,18 @@ const i18n = {
       left:  { icon: "📚", name: "Content Learning",  desc: "Platforms that provide courses, certifications and study material. Focused on knowledge consumption.", pills: ["Coursera", "Degreed", "LinkedIn Learning"], color: "blue" },
       gap:   "❌ GAP\nnot covered",
       right: { icon: "🤝", name: "Human Coaching", desc: "1:1 coaching tools, mentor sessions and people-led development.", pills: ["BetterUp", "Pathrise", "Lattice"], color: "green" },
+    },
+
+    solucion: {
+      eyebrow: "Our Vision",
+      title: "More than tools: motivation, talent and future.",
+      subtitle: "We don't just offer a tech solution. We want people to increase their motivation, develop their talent, and choose to stay at companies with a clear career plan toward success.",
+      pillars: [
+        { icon: "🔥", title: "Motivation", desc: "When people see a clear growth path, their commitment transforms into action.", color: "#f59e0b" },
+        { icon: "💎", title: "Talent", desc: "We develop the skills the company needs and the employee wants, creating value for both.", color: "#6f93eb" },
+        { icon: "🚀", title: "Retention", desc: "A good career plan reduces turnover because people choose to stay where they can grow.", color: "#22c55e" },
+        { icon: "🏆", title: "Success", desc: "Success isn't just reaching the next level — it's building a career path with purpose.", color: "#a78bfa" },
+      ],
     },
 
     gaps: {
@@ -740,7 +764,7 @@ const slides = [
       </div>
     );
     return (
-      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60 }}>
+      <div style={{ height: "100%", background: BG, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 60, position: "relative", overflow: "hidden" }}>
         <div style={{ textAlign: "center", marginBottom: 48 }}>
           <Eyebrow anim={anim}>{c.eyebrow}</Eyebrow>
           <SlideTitle anim={anim}>{c.title}</SlideTitle>
@@ -754,12 +778,47 @@ const slides = [
           </div>
           <CardSide side={c.right} dir="40px"  delay={0.4} />
         </div>
+        <img src="/hugo-plan-carrera.png" alt="Hugo - Plan de Carrera" style={{ position: "absolute", bottom: -10, right: 40, width: 160, height: "auto", opacity: anim ? 0.9 : 0, transform: anim ? "translateY(0)" : "translateY(40px)", transition: "all 0.7s ease 0.8s", filter: "drop-shadow(0 4px 20px rgba(111,147,235,0.3))" }} />
       </div>
     );
   }},
 
-  /* 2 ── 3 FLUJOS */
-  { label: "3 Flujos", render: (anim, t) => (
+  /* 2 ── SOLUCIÓN */
+  { label: "Solución", render: (anim, t) => {
+    const c = t.solucion;
+    return (
+      <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 40%, #1a2a5e 0%, #0a0a14 65%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px", position: "relative", overflow: "hidden" }}>
+        <GridBg />
+        <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(111,147,235,0.08) 0%, transparent 70%)", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
+        <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 900 }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <Eyebrow anim={anim} delay={0}>{c.eyebrow}</Eyebrow>
+            <SlideTitle anim={anim} size={46} delay={0.1}>
+              {c.title}
+            </SlideTitle>
+            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.55)", marginTop: 16, lineHeight: 1.7, maxWidth: 700, margin: "16px auto 0", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(20px)", transition: "all 0.6s ease 0.25s" }}>
+              {c.subtitle}
+            </p>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+            {c.pillars.map((p, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: 28, textAlign: "center", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(30px)", transition: `all 0.6s ease ${0.35 + i * 0.1}s` }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>{p.icon}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 20, fontWeight: 800, color: p.color, marginBottom: 12 }}>{p.title}</div>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }},
+
+  /* 3 ── MAPA PLAN DE CARRERA */
+  { label: "Mapa", render: (anim) => <MapaSlide anim={anim} /> },
+
+  /* 4 ── 3 FLUJOS */
+  { label: "Flujos", render: (anim, t) => (
     <div style={{ height: "100%", background: "radial-gradient(ellipse at 50% 40%, #1a2a5e 0%, #0a0a14 65%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 60px", position: "relative", overflow: "hidden" }}>
       <GridBg />
       <div style={{ position: "absolute", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(111,147,235,0.08) 0%, transparent 70%)", top: "50%", left: "50%", transform: "translate(-50%,-50%)" }} />
@@ -804,9 +863,6 @@ const slides = [
       </div>
     </div>
   )},
-
-  /* 3 ── MAPA PLAN DE CARRERA */
-  { label: "Mapa", render: (anim) => <MapaSlide anim={anim} /> },
 
   /* 4 ── TOOLS TIMELINE */
   { label: "Tools", render: (anim) => {
