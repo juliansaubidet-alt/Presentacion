@@ -732,7 +732,10 @@ const slides = [
         <GridBg />
         <div style={{ position: "absolute", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(111,147,235,0.15) 0%, transparent 70%)", top: "50%", left: "30%", transform: "translate(-50%,-50%)", animation: "pulse-glow 4s ease-in-out infinite" }} />
         <div style={{ position: "relative", zIndex: 2, maxWidth: 900 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(111,147,235,0.15)", border: "1px solid rgba(111,147,235,0.3)", borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 500, color: BRAND, marginBottom: 32, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease" }}>{c.tag}</div>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 12, marginBottom: 32, opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(111,147,235,0.15)", border: "1px solid rgba(111,147,235,0.3)", borderRadius: 999, padding: "6px 16px", fontSize: 12, fontWeight: 500, color: BRAND }}>{c.tag}</div>
+            <img src="/external-badge.png" alt="External" style={{ height: "85%", width: "auto" }} />
+          </div>
           <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: 68, fontWeight: 800, lineHeight: 1.1, marginBottom: 24, color: "#fff", whiteSpace: "pre-line", opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(24px)", transition: "all 0.6s ease 0.15s" }}>
             {c.titleA}<GradText>{c.titleB}</GradText>{c.titleC}
           </h1>
